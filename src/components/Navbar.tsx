@@ -235,7 +235,7 @@ export default function Navbar() {
                   >
                     <Bell className="h-5 w-5" />
                     {notificationsCount > 0 && (
-                      <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[9px] font-extrabold text-white ring-2 ring-white">
+                      <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-extrabold text-white ring-2 ring-white">
                         {notificationsCount}
                       </span>
                     )}
@@ -268,13 +268,13 @@ export default function Navbar() {
                                 onClick={() => isUnread && markAsRead(notif.id)}
                                 className={`p-3 rounded-lg text-left transition-colors cursor-pointer text-xs mb-1 ${
                                   isUnread 
-                                    ? 'bg-purple-50/50 hover:bg-purple-50 border-l-2 border-purple-600' 
+                                    ? 'bg-blue-50/50 hover:bg-blue-50 border-l-2 border-blue-500' 
                                     : 'hover:bg-slate-50 opacity-70'
                                 }`}
                               >
                                 <div className="flex justify-between items-start gap-1 font-bold text-slate-800 mb-0.5">
                                   <span>{notif.title}</span>
-                                  {isUnread && <span className="h-1.5 w-1.5 bg-purple-600 rounded-full flex-shrink-0 mt-1"></span>}
+                                  {isUnread && <span className="h-1.5 w-1.5 bg-blue-500 rounded-full flex-shrink-0 mt-1"></span>}
                                 </div>
                                 <p className="text-slate-800 leading-relaxed text-[11px]">{notif.message}</p>
                                 <span className="text-[9px] text-slate-400 mt-1 block">
@@ -291,10 +291,10 @@ export default function Navbar() {
 
                 {/* Profile Details */}
                 <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-                  <div className="flex flex-col text-right">
+                  <Link href="/dashboard" className="flex flex-col text-right hover:opacity-80 transition-opacity cursor-pointer">
                     <span className="text-xs font-bold text-slate-800 max-w-[120px] truncate">{user.name}</span>
-                    <span className="text-[10px] text-slate-400 capitalize">{user.role.replace('-', ' ')}</span>
-                  </div>
+                    <span className="text-[10px] text-slate-400 capitalize hover:text-slate-500">{user.role.replace('-', ' ')}</span>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
@@ -314,7 +314,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-xl transition-all shadow-md active:scale-[0.98] duration-200"
+                  className="text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-200 active:scale-[0.98] duration-200"
                 >
                   Register Now
                 </Link>
@@ -331,7 +331,7 @@ export default function Navbar() {
               >
                 <Bell className="h-5 w-5" />
                 {notificationsCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-3.5 w-3.5 bg-slate-900 text-white font-extrabold rounded-full flex items-center justify-center text-[8px]">
+                  <span className="absolute top-1.5 right-1.5 h-3.5 w-3.5 bg-blue-600 text-white font-extrabold rounded-full flex items-center justify-center text-[8px]">
                     {notificationsCount}
                   </span>
                 )}
@@ -384,10 +384,10 @@ export default function Navbar() {
           {user ? (
             <div className="border-t border-slate-100 pt-3 mt-1 flex flex-col gap-2">
               <div className="flex items-center justify-between px-3 py-1">
-                <div className="flex flex-col">
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer">
                   <span className="text-sm font-bold text-slate-800">{user.name}</span>
                   <span className="text-[10px] text-slate-450 capitalize">{user.role.replace('-', ' ')}</span>
-                </div>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-1.5 text-xs text-rose-500 hover:text-rose-700 font-bold cursor-pointer"
@@ -409,7 +409,7 @@ export default function Navbar() {
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-bold shadow-md transition-all"
+                className="w-full text-center py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 text-sm font-bold shadow-md transition-all"
               >
                 Register Now
               </Link>

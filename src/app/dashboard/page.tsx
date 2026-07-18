@@ -379,6 +379,11 @@ export default function UserDashboard() {
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Attendee</span>
             <h2 className="text-sm font-bold text-slate-900 mt-0.5 truncate">{user.name}</h2>
             <p className="text-xxs text-slate-500 mt-1 truncate">{user.college}</p>
+            {user.teamId && (
+              <p className="text-xxs text-slate-500 mt-1">
+                Team ID: <span className="font-mono font-bold text-purple-600">{user.teamId}</span>
+              </p>
+            )}
             
             {/* Role Badge */}
             <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-100">

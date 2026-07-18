@@ -14,6 +14,32 @@ export default function LoginPage() {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
+    // Check query params for impersonation token
+    const params = new URLSearchParams(window.location.search);
+    const queryToken = params.get('token');
+    if (queryToken) {
+      setLoading(true);
+      fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api/auth/me', {
+        headers: { Authorization: `Bearer ${queryToken}` }
+      })
+      .then(res => res.json())
+      .then(userData => {
+        if (userData && userData.id) {
+          login(queryToken, userData);
+        } else {
+          setMessage({ text: 'Invalid login token provided.', type: 'error' });
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setMessage({ text: 'Error authenticating with token.', type: 'error' });
+        setLoading(false);
+      });
+    }
+  }, [login]);
+
+  useEffect(() => {
     if (user) {
       if (user.role === 'admin') {
         router.push('/dashboard');

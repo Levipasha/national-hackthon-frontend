@@ -274,6 +274,12 @@ export default function GetInPage() {
   const [tab, setTab] = useState<'join' | 'create'>('join');
 
   useEffect(() => {
+    if (user && user.teamPreference === 'Create a Team') {
+      setTab('create');
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (!loading) {
       if (!user) { router.push('/login'); return; }
       if (user.paymentStatus !== 'paid') { router.push('/register'); return; }

@@ -13,6 +13,7 @@ export interface User {
   gender: string;
   linkedin: string;
   portfolio?: string;
+  teamPreference?: string;
   role: 'admin' | 'team-leader' | 'participant';
   paymentStatus: 'pending' | 'paid' | 'refunded';
   paymentId?: string;

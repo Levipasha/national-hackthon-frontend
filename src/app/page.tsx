@@ -216,10 +216,11 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="flex-1 w-full bg-slate-50 text-slate-800 relative overflow-hidden bg-grid">
-      {/* Decorative ambient glows in light mode */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-100/50 blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-100/50 blur-[120px] pointer-events-none -z-10" />
+    <div className="flex-1 w-full bg-hero-official text-slate-800 relative overflow-hidden bg-grid">
+      {/* Decorative ambient orbs — official blue + rose */}
+      <div className="orb-blue absolute top-[-8%] left-[-8%] w-[55%] h-[55%] rounded-full bg-blue-200/40 blur-[130px] pointer-events-none -z-10" />
+      <div className="orb-rose absolute bottom-[18%] right-[-8%] w-[50%] h-[50%] rounded-full bg-rose-200/35 blur-[130px] pointer-events-none -z-10" />
+      <div className="absolute top-[45%] left-[35%] w-[30%] h-[30%] rounded-full bg-pink-100/30 blur-[100px] pointer-events-none -z-10" />
 
       {/* Hero Section with Vertical Marquee */}
       <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
@@ -316,10 +317,10 @@ export default function LandingPage() {
               </VerticalMarquee>
               
               {/* Top vignette */}
-              <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-slate-50 to-transparent z-10"></div>
+              <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#eff6ff] to-transparent z-10"></div>
               
               {/* Bottom vignette */}
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-50 to-transparent z-10"></div>
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#eff6ff] to-transparent z-10"></div>
             </div>
           </div>
 
@@ -327,14 +328,14 @@ export default function LandingPage() {
       </section>
 
       {/* Countdown Ticker Section */}
-      <section className="py-12 bg-white border-y border-slate-200 shadow-sm">
+      <section className="py-12 bg-white/80 backdrop-blur-sm border-y border-blue-100 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Hacking Starts In</p>
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-6">Hacking Starts In</p>
           <div className="grid grid-cols-4 gap-4 max-w-lg mx-auto">
             {Object.entries(timeLeft).map(([label, value]) => (
-              <div key={label} className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50 border border-slate-200 shadow-inner">
-                <span className="text-2xl sm:text-4xl font-extrabold text-slate-900 font-mono">{String(value).padStart(2, '0')}</span>
-                <span className="text-[10px] text-slate-500 capitalize mt-1 font-semibold">{label}</span>
+              <div key={label} className="flex flex-col items-center p-3.5 rounded-xl bg-blue-50 border border-blue-100 shadow-inner">
+                <span className="text-2xl sm:text-4xl font-extrabold text-blue-700 font-mono">{String(value).padStart(2, '0')}</span>
+                <span className="text-[10px] text-blue-500 capitalize mt-1 font-semibold">{label}</span>
               </div>
             ))}
           </div>
@@ -358,7 +359,7 @@ export default function LandingPage() {
 
       {/* Highlights & Album Snaps Section */}
       {albums.length > 0 && (
-        <section className="py-24 bg-slate-100 border-y border-slate-200">
+        <section className="py-24 bg-section-blue border-y border-blue-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">GALLERY</span>
@@ -403,20 +404,20 @@ export default function LandingPage() {
       )}
 
       {/* Why Participate & Highlights Grid */}
-      <section className="py-24 bg-white border-y border-slate-200">
+      <section className="py-24 bg-white/70 backdrop-blur-sm border-y border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
             {/* Why Participate */}
             <div className="text-left space-y-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
-                <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                <CheckCircle2 className="h-6 w-6 text-blue-600" />
                 Why Participate?
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 {BENEFITS.map((b, idx) => (
                   <div key={idx} className="flex gap-2.5 items-start text-slate-700 text-xs">
-                    <span className="h-1.5 w-1.5 bg-purple-600 rounded-full mt-1.5 flex-shrink-0" />
+                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
                     <span>{b}</span>
                   </div>
                 ))}
@@ -424,15 +425,15 @@ export default function LandingPage() {
             </div>
 
             {/* Highlights */}
-            <div className="text-left space-y-6 lg:border-l lg:border-slate-200 lg:pl-12">
+            <div className="text-left space-y-6 lg:border-l lg:border-blue-100 lg:pl-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-purple-600" />
+                <Sparkles className="h-6 w-6 text-rose-500" />
                 Event Highlights
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 {HIGHLIGHTS.map((h, idx) => (
                   <div key={idx} className="flex gap-2.5 items-start text-slate-700 text-xs">
-                    <span className="h-1.5 w-1.5 bg-purple-600 rounded-full mt-1.5 flex-shrink-0" />
+                    <span className="h-1.5 w-1.5 bg-rose-400 rounded-full mt-1.5 flex-shrink-0" />
                     <span>{h}</span>
                   </div>
                 ))}
@@ -448,7 +449,7 @@ export default function LandingPage() {
         
         {/* Header Block */}
         <div className="text-center space-y-4 mb-20 max-w-3xl mx-auto">
-          <div className="inline-flex p-2 bg-purple-50 rounded-xl text-purple-600 border border-purple-100 mb-2">
+          <div className="inline-flex p-2 bg-blue-50 rounded-xl text-blue-600 border border-blue-100 mb-2">
             <Trophy className="h-6 w-6" />
           </div>
           <div className="relative w-fit mx-auto">
@@ -466,11 +467,15 @@ export default function LandingPage() {
           {TOP_PRIZES.map((tier, index) => (
             <div
               key={tier.name}
-              className="relative group transition-all duration-300 bg-white rounded-3xl border border-slate-200/80 p-8 text-left shadow-sm hover:shadow-md hover:scale-[1.01]"
+              className={`relative group transition-all duration-300 rounded-3xl border p-8 text-left shadow-sm hover:shadow-lg hover:scale-[1.01] ${
+                tier.popular
+                  ? 'bg-gradient-to-br from-blue-50 to-rose-50 border-blue-200'
+                  : 'bg-white border-slate-200/80'
+              }`}
             >
               {tier.popular && (
                 <div
-                  className="absolute -top-3 right-6 bg-slate-900 text-white 
+                  className="absolute -top-3 right-6 bg-gradient-to-r from-blue-600 to-rose-500 text-white 
                   font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider"
                 >
                   Grand Winner
@@ -479,7 +484,9 @@ export default function LandingPage() {
 
               <div className="mb-6">
                 <div
-                  className="w-12 h-12 rounded-2xl mb-4 flex items-center justify-center bg-slate-50 border border-slate-100"
+                  className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center border ${
+                    tier.popular ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'
+                  }`}
                 >
                   {tier.icon}
                 </div>
@@ -493,7 +500,7 @@ export default function LandingPage() {
 
               {/* Prize Value */}
               <div className="mb-6 font-mono">
-                <span className="text-3xl font-black text-slate-900 tracking-tight">
+                <span className={`text-3xl font-black tracking-tight ${tier.popular ? 'text-blue-700' : 'text-slate-900'}`}>
                   {tier.prizeValue}
                 </span>
               </div>
@@ -502,8 +509,10 @@ export default function LandingPage() {
               <div className="space-y-3 mb-8">
                 {tier.features.map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full border border-slate-200 flex items-center justify-center bg-slate-50 shrink-0">
-                      <Check className="w-2.5 h-2.5 text-purple-600" />
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                      tier.popular ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+                    }`}>
+                      <Check className={`w-2.5 h-2.5 ${tier.popular ? 'text-blue-600' : 'text-rose-500'}`} />
                     </div>
                     <span className="text-xs text-slate-700 font-medium">
                       {feature}
@@ -517,8 +526,8 @@ export default function LandingPage() {
                 href="/register"
                 className={`w-full h-11 flex items-center justify-center font-bold text-xs uppercase tracking-wider rounded-xl transition-all border ${
                   tier.popular
-                    ? "bg-slate-900 text-white hover:bg-slate-800 border-transparent"
-                    : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 border-transparent shadow-md shadow-blue-200'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200'
                 }`}
               >
                 Register to Win
@@ -528,16 +537,16 @@ export default function LandingPage() {
         </div>
 
         {/* Category specific prizes grid */}
-        <div className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 shadow-sm text-left mb-12">
-          <h3 className="text-base font-bold text-slate-900 mb-6 border-b border-slate-100 pb-3 uppercase tracking-wider">
+        <div className="max-w-5xl mx-auto bg-white border border-blue-100 rounded-3xl p-8 shadow-sm text-left mb-12">
+          <h3 className="text-base font-bold text-slate-900 mb-6 border-b border-blue-50 pb-3 uppercase tracking-wider">
             Special Category Cash Awards (₹10,000 – ₹15,000 each)
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {CATEGORY_PRIZES.map((cp, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all">
+              <div key={idx} className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 hover:border-blue-200 hover:bg-blue-50 transition-all">
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs font-bold text-slate-900">{cp.name}</span>
-                  <span className="text-xs font-black text-purple-600 font-mono">{cp.value}</span>
+                  <span className="text-xs font-black text-blue-600 font-mono">{cp.value}</span>
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed">{cp.desc}</p>
               </div>
@@ -546,13 +555,13 @@ export default function LandingPage() {
         </div>
 
         {/* Additional Certificate Awards */}
-        <div className="max-w-5xl mx-auto bg-slate-50 border border-slate-200 rounded-3xl p-6 text-left">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+        <div className="max-w-5xl mx-auto bg-rose-50/60 border border-rose-100 rounded-3xl p-6 text-left">
+          <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-4">
             Additional Certificate Recognitions
           </h3>
           <div className="flex flex-wrap gap-3">
             {CERTIFICATE_AWARDS.map((ca, idx) => (
-              <span key={idx} className="px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+              <span key={idx} className="px-3.5 py-1.5 rounded-full bg-white border border-rose-200 text-xs font-semibold text-slate-700">
                 ⭐ {ca}
               </span>
             ))}
@@ -562,7 +571,7 @@ export default function LandingPage() {
 
       {/* Chief Guests Section */}
       {guests.filter(g => g.status === 'confirmed').length > 0 && (
-        <section className="py-24 bg-slate-50">
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-pink-50 border-y border-blue-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-16">
               <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">DIGNITARIES</span>
@@ -613,7 +622,7 @@ export default function LandingPage() {
       )}
 
       {/* Faculty & Student Coordinators */}
-      <section id="coordinators" className="py-24 bg-white border-y border-slate-200">
+      <section id="coordinators" className="py-24 bg-white/70 backdrop-blur-sm border-y border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">SUPPORT DESK</span>
@@ -630,7 +639,7 @@ export default function LandingPage() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {coordinators.filter(c => c.role.toLowerCase().includes('faculty') || c.role.toLowerCase().includes('dean') || c.role.toLowerCase().includes('professor')).map((fc, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all flex gap-3 items-center">
+                  <div key={idx} className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5 hover:border-blue-200 hover:bg-blue-50 transition-all flex gap-3 items-center">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${fc.color}22`, color: fc.color, border: `1px solid ${fc.color}55` }}>
                       {fc.avatar}
                     </div>
@@ -655,7 +664,7 @@ export default function LandingPage() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {coordinators.filter(c => !c.role.toLowerCase().includes('faculty') && !c.role.toLowerCase().includes('dean') && !c.role.toLowerCase().includes('professor')).map((sc, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all flex gap-3 items-center">
+                  <div key={idx} className="bg-rose-50/60 border border-rose-100 rounded-2xl p-5 hover:border-rose-200 hover:bg-rose-50 transition-all flex gap-3 items-center">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${sc.color}22`, color: sc.color, border: `1px solid ${sc.color}55` }}>
                       {sc.avatar}
                     </div>
@@ -690,11 +699,11 @@ export default function LandingPage() {
             { stage: '3', title: 'Prototype Quality', time: '12:00 PM – 3:00 PM', desc: 'Reviews UI/UX designs, teamwork metrics, user flow completion, and mentor feedback integration.' },
             { stage: '4', title: 'Final Pitch & Demo', time: '3:00 PM – 5:00 PM', desc: 'Working prototype demos, slide pitching, code explanations, and Q&A defense.' },
           ].map((item, idx) => (
-            <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-200 flex flex-col justify-between min-h-[15rem] hover:shadow-sm hover:border-slate-350 transition-all">
+            <div key={idx} className="p-6 rounded-2xl bg-white border border-blue-100 flex flex-col justify-between min-h-[15rem] hover:shadow-md hover:border-blue-200 transition-all">
               <div>
-                <span className="text-2xl font-black text-slate-300 font-mono">Stage 0{item.stage}</span>
+                <span className="text-2xl font-black text-blue-200 font-mono">Stage 0{item.stage}</span>
                 <h4 className="text-sm font-bold text-slate-900 mt-2">{item.title}</h4>
-                <p className="text-[10px] text-purple-600 font-bold font-mono mt-0.5">{item.time}</p>
+                <p className="text-[10px] text-blue-600 font-bold font-mono mt-0.5">{item.time}</p>
               </div>
               <p className="text-xxs text-slate-500 leading-relaxed mt-4">{item.desc}</p>
             </div>
@@ -703,12 +712,12 @@ export default function LandingPage() {
       </section>
 
       {/* Rules & Eligibility Section */}
-      <section className="py-24 bg-white border-y border-slate-200">
+      <section className="py-24 bg-section-rose border-y border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             {/* Eligibility */}
-            <div className="bg-slate-50 border border-slate-200 p-8 rounded-2xl text-left space-y-4">
-              <h3 className="text-sm font-bold text-purple-600 flex items-center gap-2 uppercase tracking-wider mb-2 font-mono">
+            <div className="bg-white/80 border border-blue-100 p-8 rounded-2xl text-left space-y-4 shadow-sm">
+              <h3 className="text-sm font-bold text-blue-600 flex items-center gap-2 uppercase tracking-wider mb-2 font-mono">
                 <Users className="h-4.5 w-4.5" />
                 Eligibility
               </h3>
@@ -721,7 +730,7 @@ export default function LandingPage() {
                   'Each participant must register individually'
                 ].map((el, i) => (
                   <li key={i} className="flex gap-2 items-center">
-                    <CheckCircle2 className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
                     <span>{el}</span>
                   </li>
                 ))}
@@ -729,7 +738,7 @@ export default function LandingPage() {
             </div>
 
             {/* Team Rules */}
-            <div className="bg-slate-50 border border-slate-200 p-8 rounded-2xl text-left space-y-4">
+            <div className="bg-white/80 border border-rose-100 p-8 rounded-2xl text-left space-y-4 shadow-sm">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider mb-2 font-mono">
                 <Layers className="h-4.5 w-4.5" />
                 Team Rules
@@ -744,7 +753,7 @@ export default function LandingPage() {
                   'Jury decisions are absolute and final'
                 ].map((rule, i) => (
                   <li key={i} className="flex gap-2 items-center">
-                    <CheckCircle2 className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-rose-400 flex-shrink-0" />
                     <span>{rule}</span>
                   </li>
                 ))}
@@ -786,18 +795,18 @@ export default function LandingPage() {
       </section>
 
       {/* Inclusions / What's Included */}
-      <section className="py-24 bg-white border-y border-slate-200">
+      <section className="py-24 bg-section-blue border-y border-blue-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">HOSPITALITY</span>
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest font-mono">HOSPITALITY</span>
             <h2 className="text-3xl font-bold text-slate-900 mt-2">What is Included?</h2>
             <p className="text-slate-500 text-xs mt-1">Included facilities provided to every participant with their ₹399 entry fee.</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {INCLUSIONS.map((item, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center gap-3 text-left">
-                <CheckCircle2 className="h-5 w-5 text-purple-600 flex-shrink-0" />
+              <div key={idx} className="p-4 rounded-2xl bg-white border border-blue-100 flex items-center gap-3 text-left shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+                <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 <span className="text-xs text-slate-800 font-semibold">{item}</span>
               </div>
             ))}
@@ -816,17 +825,17 @@ export default function LandingPage() {
           {FAQS.map((faq, idx) => (
             <div
               key={idx}
-              className="rounded-2xl bg-white border border-slate-200 overflow-hidden transition-all duration-300"
+              className="rounded-2xl bg-white border border-blue-100 overflow-hidden transition-all duration-300 hover:border-blue-200 shadow-sm"
             >
               <button
                 onClick={() => toggleFaq(idx)}
-                className="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 hover:bg-blue-50/40 transition-colors cursor-pointer"
               >
                 <span className="text-xs font-bold text-slate-900">{faq.q}</span>
-                <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-350 ${faqOpen === idx ? 'transform rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 text-blue-400 transition-transform duration-350 ${faqOpen === idx ? 'transform rotate-180' : ''}`} />
               </button>
               {faqOpen === idx && (
-                <div className="px-6 pb-5 pt-1 text-xs text-slate-500 leading-relaxed border-t border-slate-100 bg-slate-50/50">
+                <div className="px-6 pb-5 pt-1 text-xs text-slate-500 leading-relaxed border-t border-blue-50 bg-blue-50/30">
                   {faq.a}
                 </div>
               )}
@@ -837,26 +846,26 @@ export default function LandingPage() {
 
       {/* Helpdesk Support Section */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="bg-white border border-slate-200 p-12 rounded-3xl relative overflow-hidden shadow-sm">
+        <div className="bg-gradient-to-br from-blue-50 to-rose-50 border border-blue-100 p-12 rounded-3xl relative overflow-hidden shadow-sm">
           <h2 className="text-2xl font-extrabold text-slate-900 mb-3">Have Questions or Need Help?</h2>
           <p className="text-slate-500 text-xs mb-8 max-w-lg mx-auto">
             Our student and faculty coordinator teams are available to assist you with registration inquiries or team formation questions.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto mb-8 text-left text-xs">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 uppercase font-bold font-mono">Email Support</span>
-              <a href="mailto:codesprint@audisankara.ac.in" className="block font-semibold text-slate-800 mt-1 hover:text-purple-600 truncate">codesprint@audisankara.ac.in</a>
+            <div className="p-4 rounded-xl border border-blue-100 bg-white/80">
+              <span className="text-[10px] text-blue-500 uppercase font-bold font-mono">Email Support</span>
+              <a href="mailto:codesprint@audisankara.ac.in" className="block font-semibold text-slate-800 mt-1 hover:text-blue-600 truncate">codesprint@audisankara.ac.in</a>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 uppercase font-bold font-mono">Phone Helpline</span>
+            <div className="p-4 rounded-xl border border-rose-100 bg-white/80">
+              <span className="text-[10px] text-rose-400 uppercase font-bold font-mono">Phone Helpline</span>
               <p className="font-semibold text-slate-800 mt-1">+91 8309848987 / 7569520695</p>
             </div>
           </div>
 
           <a
             href="mailto:codesprint@audisankara.ac.in"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium text-xs shadow-md shadow-blue-200 transition-all"
           >
             Email Support Team
             <ArrowRight className="h-4 w-4" />
