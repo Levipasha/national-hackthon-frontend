@@ -30,8 +30,9 @@ export default function UserDashboard() {
   const [pendingInvites, setPendingInvites]   = useState<any[]>([]);
   const [respondingInvite, setRespondingInvite] = useState<string | null>(null);
 
-  // General dashboard announcements
+  // General dashboard announcements & problems
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [problems, setProblems] = useState<any[]>([]);
 
   // Form input validation messages
   const [teamError, setTeamError] = useState('');
@@ -99,10 +100,25 @@ export default function UserDashboard() {
     }
   };
 
+  const fetchProblems = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/user/problem-statements', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setProblems(await res.json());
+      }
+    } catch (e) {
+      console.error('Error fetching problems:', e);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchMyTeam();
       fetchAnnouncements();
+      fetchProblems();
       fetchPendingInvites();
     }
   }, [user]);
@@ -439,7 +455,7 @@ export default function UserDashboard() {
                       <Bell className="h-5 w-5 text-purple-600" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[10px] text-slate-505 font-bold uppercase tracking-wider">Pending Team Invite</span>
+                      <span className="text-[10px] text-slate-505 font-bold uppercase tracking-wider block">Pending Team Invite</span>
                       <h4 className="text-sm font-bold text-slate-900 mt-0.5">
                         You're invited to join <span className="text-purple-650 font-extrabold">{inv.teamName}</span>
                       </h4>
@@ -575,6 +591,29 @@ export default function UserDashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Assigned Problem Statements */}
+              {problems.length > 0 && (
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <Award className="h-4.5 w-4.5 text-purple-600" />
+                    Assigned Problem Statements
+                  </h3>
+                  <div className="space-y-4">
+                    {problems.map((p, idx) => (
+                      <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-xl p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-bold text-slate-800 text-sm">{p.title}</h4>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full uppercase">Active</span>
+                        </div>
+                        <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
+                          {p.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

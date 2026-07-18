@@ -87,7 +87,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 w-full bg-slate-50 relative overflow-hidden bg-grid flex items-center justify-center min-h-screen px-4">
+    <div className="flex-1 w-full bg-slate-50 relative overflow-hidden flex items-center justify-center min-h-screen px-4" style={{ background: 'url(/login-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
       {/* subtle radial light */}
       <div className="absolute inset-0 bg-gradient-radial from-purple-100/30 to-transparent pointer-events-none" />
 

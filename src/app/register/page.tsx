@@ -41,6 +41,7 @@ function RegisterForm() {
     branch: '',
     year: '1st Year',
     gender: 'Male',
+    tshirtSize: 'M',
     linkedin: '',
     portfolio: ''
   });
@@ -51,6 +52,15 @@ function RegisterForm() {
   const [couponError, setCouponError] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   
+  const [colleges, setColleges] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/colleges')
+      .then(res => res.json())
+      .then(data => setColleges(data))
+      .catch(console.error);
+  }, []);
+
   // Payment states
   const [paymentStep, setPaymentStep] = useState<'form' | 'coming-soon' | 'success'>('form');
   const [createdOrder, setCreatedOrder] = useState<any>(null);
@@ -221,7 +231,7 @@ function RegisterForm() {
   };
 
   return (
-    <div className="flex-1 w-full bg-slate-50 relative overflow-hidden bg-grid flex items-center justify-center py-20 px-4 animate-[fadeIn_0.3s_ease-out]">
+    <div className="flex-1 w-full relative overflow-hidden flex items-center justify-center py-20 px-4 animate-[fadeIn_0.3s_ease-out]" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
       {/* Glow decorations */}
       <div className="absolute top-[-10%] left-[-15%] w-[45%] h-[45%] rounded-full bg-purple-100/50 blur-[100px] pointer-events-none -z-10" />
       <div className="absolute bottom-[-10%] right-[-15%] w-[45%] h-[45%] rounded-full bg-blue-100/50 blur-[100px] pointer-events-none -z-10" />
@@ -284,7 +294,16 @@ function RegisterForm() {
                   <label htmlFor="college" className="block text-xs font-semibold text-slate-600 mb-1.5 pl-1 uppercase">College Name</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><School className="h-4 w-4" /></span>
-                    <input id="college" type="text" required placeholder="Audisankara College / ASCET" value={formData.college} onChange={handleChange} className="block w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500/50 text-xs" />
+                    {colleges.length > 0 ? (
+                      <select id="college" required value={formData.college} onChange={handleChange} className="block w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-purple-500/50 text-xs cursor-pointer appearance-none">
+                        <option value="" disabled>Select your college</option>
+                        {colleges.map((c: any) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input id="college" type="text" required placeholder="Audisankara College / ASCET" value={formData.college} onChange={handleChange} className="block w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500/50 text-xs" />
+                    )}
                   </div>
                 </div>
 
@@ -321,6 +340,23 @@ function RegisterForm() {
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* T-Shirt Size */}
+                <div>
+                  <label htmlFor="tshirtSize" className="block text-xs font-semibold text-slate-600 mb-1.5 pl-1 uppercase">T-Shirt Size</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l4 4m0 0l3-3 3 3m0 0l4-4M5 3v18h14V3" /></svg>
+                    </span>
+                    <select id="tshirtSize" value={formData.tshirtSize} onChange={handleChange} className="block w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-purple-500/50 text-xs cursor-pointer">
+                      <option value="S">S — Small</option>
+                      <option value="M">M — Medium</option>
+                      <option value="L">L — Large</option>
+                      <option value="XL">XL — Extra Large</option>
+                      <option value="XXL">XXL — Double Extra Large</option>
                     </select>
                   </div>
                 </div>

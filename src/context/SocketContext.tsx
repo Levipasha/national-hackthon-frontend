@@ -77,15 +77,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [user, refreshTrigger]);
 
   useEffect(() => {
-    if (!user) {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
-      }
-      return;
-    }
-
-    // Connect to Socket server
+    // Always connect to Socket server to receive public broadcasts
     const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
       withCredentials: true,
       transports: ['websocket', 'polling']
@@ -96,12 +88,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     socketInstance.on('connect', () => {
       console.log('[Socket] Connected to server');
       
-      // Join user's personal room
-      socketInstance.emit('join_user_room', user.id);
-      
-      // Join team room if user is in a team
-      if (user.teamId) {
-        socketInstance.emit('join_team_room', user.teamId);
+      // If user is logged in, join authenticated rooms
+      if (user) {
+        socketInstance.emit('join_user_room', user.id);
+        
+        if (user.teamId) {
+          socketInstance.emit('join_team_room', user.teamId);
+        }
       }
     });
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Award, Users, ShieldAlert, Sparkles, MessageSquare, ArrowRight, CheckCircle2, ChevronDown, Trophy, Clock, Cpu, BookOpen, Layers, Check, Ticket, Phone } from 'lucide-react';
+import { Calendar, MapPin, Award, Users, ShieldAlert, Sparkles, MessageSquare, ArrowRight, CheckCircle2, ChevronDown, Trophy, Clock, Cpu, BookOpen, Layers, Check, Ticket, Phone, FolderOpen, Image as ImageIcon, X, Star } from 'lucide-react';
 
 const TOP_PRIZES = [
   {
@@ -65,25 +65,7 @@ const CERTIFICATE_AWARDS = [
   "Jury's Choice Award"
 ];
 
-const FACULTY_COORDINATORS = [
-  { name: 'Dr. N. Penchalaiah', role: 'Faculty Coordinator', contact: '8309848987' },
-  { name: 'Dr. G. Manoj Kumar', role: 'Faculty Coordinator', contact: '9885448657' },
-  { name: 'Dr. BVS Uma Prathyusha', role: 'Faculty Coordinator', contact: '8499986269' },
-  { name: 'Prof. C. Suneetha', role: 'Faculty Mentor', contact: '9490101043' },
-  { name: 'Dr. J. Amarendra', role: 'Co-Convener / Principal, ASCET', contact: '9398885403' },
-  { name: 'Dr. Mohsin Ahmed', role: 'Faculty Mentor', contact: '8082353507' }
-];
 
-const STUDENT_COORDINATORS = [
-  { name: 'Mr. Palati Koushik', role: 'Student Lead', contact: '7569520695' },
-  { name: 'Mr. Mayur Rai', role: 'Student Lead', contact: '7460817621' },
-  { name: 'Mr. Siva Papa Rao', role: 'Coordinator', contact: '8688154471' },
-  { name: 'Ms. Sravani', role: 'Coordinator', contact: '9063971817' },
-  { name: 'Mr. Nayab', role: 'Coordinator', contact: '8985611197' },
-  { name: 'Ms. B. Kavya', role: 'Coordinator', contact: '9985833812' },
-  { name: 'Ms. Sai Deepthi', role: 'Coordinator', contact: '9441569347' },
-  { name: 'Ms. Yaga Sri', role: 'Coordinator', contact: '9032599568' }
-];
 
 // Why Participate bullets
 const BENEFITS = [
@@ -133,7 +115,47 @@ const FAQS = [
 export default function LandingPage() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+  const [guests, setGuests] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [coordinators, setCoordinators] = useState<any[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<any | null>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/guests')
+      .then(res => res.json())
+      .then(data => setGuests(data))
+      .catch(console.error);
+
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/highlights')
+      .then(res => res.json())
+      .then(data => setAlbums(data))
+      .catch(console.error);
+
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/timeline')
+      .then(res => res.json())
+      .then(data => setTimeline(data))
+      .catch(console.error);
+      
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/coordinators')
+      .then(res => res.json())
+      .then(data => setCoordinators(data))
+      .catch(console.error);
+
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/highlights')
+      .then(res => res.json())
+      .then(data => setAlbums(data))
+      .catch(console.error);
+
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/timeline')
+      .then(res => res.json())
+      .then(data => {
+        const sorted = data.sort((a: any, b: any) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
+        setTimeline(sorted);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const marqueeContainer = marqueeRef.current;
@@ -334,6 +356,52 @@ export default function LandingPage() {
         </p>
       </section>
 
+      {/* Highlights & Album Snaps Section */}
+      {albums.length > 0 && (
+        <section className="py-24 bg-slate-100 border-y border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">GALLERY</span>
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">Past Highlights & Album Snaps</h2>
+              <p className="text-slate-500 text-xs sm:text-sm mt-2 max-w-2xl mx-auto">
+                Take a walk down memory lane and discover the spirit of collaboration, coding, and celebration in our past events.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[...albums].sort((a, b) => b.isPinned - a.isPinned).map((album, idx) => (
+                <div 
+                  key={idx} 
+                  className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-purple-200 hover:-translate-y-1 transition-all cursor-pointer group"
+                  onClick={() => setSelectedAlbum(album)}
+                >
+                  <div className="h-40 rounded-2xl bg-slate-100 overflow-hidden relative mb-4">
+                    {album.coverImageUrl ? (
+                      <img src={album.coverImageUrl} alt={album.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                        <FolderOpen size={40} className="mb-2" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5">
+                      <ImageIcon size={12} className="text-purple-600" />
+                      {album.images?.length || 0} Snaps
+                    </div>
+                    {album.isPinned && (
+                      <div className="absolute top-3 right-3 bg-amber-400/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-white">
+                        <Star size={12} fill="currentColor" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm truncate">{album.title}</h3>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{album.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Why Participate & Highlights Grid */}
       <section className="py-24 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -492,6 +560,58 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Chief Guests Section */}
+      {guests.filter(g => g.status === 'confirmed').length > 0 && (
+        <section className="py-24 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">DIGNITARIES</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-2 mb-4">Chief Guests & Speakers</h2>
+              <p className="text-slate-500 text-sm">Industry leaders and visionaries joining us for CodeSprint.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {guests.filter(g => g.status === 'confirmed').map((guest, idx) => (
+                <div key={idx} className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover-scale w-full text-left">
+                  <div className="relative overflow-hidden image-container">
+                    <img 
+                      src={guest.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(guest.name)}&background=random&size=400`}
+                      alt={guest.name} 
+                      className="w-full aspect-square object-cover image-scale"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                    <div className="absolute bottom-5 left-5 right-5">
+                      <h3 className="text-2xl font-bold text-white drop-shadow-lg leading-tight">{guest.name}</h3>
+                    </div>
+                    {guest.vip && (
+                      <div className="absolute top-4 right-4 bg-amber-400/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm text-amber-900 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Star size={10} fill="currentColor" /> VIP
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-5 flex items-center justify-between bg-white">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-full overflow-hidden hover-scale-sm ring-2 ring-slate-100 flex-shrink-0 shadow-sm">
+                        <img 
+                          src={guest.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(guest.name)}&background=random&size=100`}
+                          alt="Avatar" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="hover-translate flex-1">
+                        <div className="text-sm font-bold text-slate-800 line-clamp-1">{guest.designation}</div>
+                        {guest.topic && <div className="text-[10px] font-medium text-purple-600 uppercase tracking-wider mt-0.5 line-clamp-1">{guest.topic}</div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Faculty & Student Coordinators */}
       <section id="coordinators" className="py-24 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -509,14 +629,19 @@ export default function LandingPage() {
                 Faculty Coordinators & Mentors
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {FACULTY_COORDINATORS.map((fc, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono">{fc.role}</span>
-                    <h4 className="text-sm font-bold text-slate-800 mt-1">{fc.name}</h4>
-                    <a href={`tel:${fc.contact}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-2.5 inline-flex items-center gap-1.5 font-mono">
-                      <Phone className="h-3.5 w-3.5" />
-                      {fc.contact}
-                    </a>
+                {coordinators.filter(c => c.role.toLowerCase().includes('faculty') || c.role.toLowerCase().includes('dean') || c.role.toLowerCase().includes('professor')).map((fc, idx) => (
+                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all flex gap-3 items-center">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${fc.color}22`, color: fc.color, border: `1px solid ${fc.color}55` }}>
+                      {fc.avatar}
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{fc.role}</span>
+                      <h4 className="text-sm font-bold text-slate-800 mt-0.5">{fc.name}</h4>
+                      <a href={`tel:${fc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
+                        <Phone className="h-3.5 w-3.5" />
+                        {fc.phone}
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -529,14 +654,19 @@ export default function LandingPage() {
                 Student Coordinators
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {STUDENT_COORDINATORS.map((sc, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono">{sc.role}</span>
-                    <h4 className="text-sm font-bold text-slate-800 mt-1">{sc.name}</h4>
-                    <a href={`tel:${sc.contact}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-2.5 inline-flex items-center gap-1.5 font-mono">
-                      <Phone className="h-3.5 w-3.5" />
-                      {sc.contact}
-                    </a>
+                {coordinators.filter(c => !c.role.toLowerCase().includes('faculty') && !c.role.toLowerCase().includes('dean') && !c.role.toLowerCase().includes('professor')).map((sc, idx) => (
+                  <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300 transition-all flex gap-3 items-center">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${sc.color}22`, color: sc.color, border: `1px solid ${sc.color}55` }}>
+                      {sc.avatar}
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{sc.role}</span>
+                      <h4 className="text-sm font-bold text-slate-800 mt-0.5">{sc.name}</h4>
+                      <a href={`tel:${sc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
+                        <Phone className="h-3.5 w-3.5" />
+                        {sc.phone}
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -632,29 +762,26 @@ export default function LandingPage() {
         </div>
 
         <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-4 sm:before:left-1/2 before:w-[1px] before:bg-slate-200">
-          {[
-            { label: 'Registration Window Opens', date: 'Now' },
-            { label: 'Registration Closes (Last Date)', date: '03 August 2026' },
-            { label: 'Team Formation & Lock Deadline', date: '05 August 2026' },
-            { label: 'CodeSprint-2026 Commences', date: '08 August 2026 (09:00 AM)' },
-            { label: 'Jury Pitching & Demos', date: '08 August 2026 (03:00 PM)' },
-            { label: 'Winner Announcements & Closing', date: '08 August 2026 (05:00 PM)' },
-          ].map((item, idx) => {
+          {timeline.length > 0 ? timeline.map((item, idx) => {
             const isEven = idx % 2 === 0;
+            const formattedDate = new Date(`${item.date}T12:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
             return (
-              <div key={idx} className={`flex flex-col sm:flex-row items-start relative ${isEven ? 'sm:flex-row-reverse' : ''}`}>
+              <div key={item.id || idx} className={`flex flex-col sm:flex-row items-start relative ${isEven ? 'sm:flex-row-reverse' : ''}`}>
                 {/* timeline node dot */}
                 <div className="absolute left-4 sm:left-1/2 transform -translate-x-[50%] top-1 h-3.5 w-3.5 rounded-full border-2 border-purple-600 bg-white z-10" />
                 
                 <div className="w-full sm:w-[45%] pl-10 sm:pl-0 sm:px-6 text-left sm:text-right">
                   <div className="p-4 rounded-xl bg-white border border-slate-200/80 flex flex-col justify-center text-left hover:border-slate-300 hover:shadow-sm transition-all">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{item.label}</span>
-                    <span className="text-xs font-bold text-slate-800 mt-1">{item.date}</span>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{item.title}</span>
+                    <span className="text-xs font-bold text-slate-800 mt-1">{formattedDate} ({item.time})</span>
+                    {item.description && <span className="text-[10px] text-slate-500 mt-2">{item.description}</span>}
                   </div>
                 </div>
               </div>
             );
-          })}
+          }) : (
+            <div className="text-center text-sm text-slate-500 py-8">Timeline events will be announced soon.</div>
+          )}
         </div>
       </section>
 
@@ -737,15 +864,69 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Lightbox Modal for Albums */}
+      {selectedAlbum && (
+        <div className="fixed inset-0 z-[100] bg-[#1B2336]/80 backdrop-blur-md flex flex-col p-4 sm:p-8 animate-in fade-in duration-200">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-white">{selectedAlbum.title}</h3>
+              <p className="text-xs text-slate-400 mt-1">{selectedAlbum.description}</p>
+            </div>
+            <button 
+              onClick={() => setSelectedAlbum(null)}
+              className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {selectedAlbum.images && selectedAlbum.images.length > 0 ? (
+              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+                {selectedAlbum.images.map((img: string, i: number) => (
+                  <div key={i} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                    <img src={img} alt={`album-snap-${i}`} className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                <ImageIcon size={48} className="mb-4 opacity-50" />
+                <p>No snaps available in this album yet.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes marquee-vertical {
-          from {
-            transform: translateY(0);
-          }
-          to {
-            transform: translateY(-50%);
-          }
+          from { transform: translateY(0); }
+          to { transform: translateY(-50%); }
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,255,255,0.3);
+        }
+
+        .hover-scale { transition: transform 700ms ease-out; }
+        .hover-scale:hover { transform: scale(1.02); }
+        .image-scale { transition: transform 700ms ease-out; }
+        .image-container:hover .image-scale { transform: scale(1.03); }
+        .hover-translate { transition: transform 500ms ease-out; }
+        .hover-translate:hover { transform: translateX(4px); }
+        .hover-scale-sm { transition: transform 500ms ease-out; }
+        .hover-scale-sm:hover { transform: scale(1.1); }
       `}</style>
     </div>
   );
