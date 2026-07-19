@@ -1,8 +1,9 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense, useState, useRef } from 'react';
+import React, { Suspense, useState, useRef } from 'react';
 import { ShieldCheck, User, Mail, Phone, BookOpen, Hash, Building2, Calendar, CreditCard, ArrowLeft, Lock, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 function PayFrame() {
   const searchParams = useSearchParams();
@@ -16,10 +17,56 @@ function PayFrame() {
   const college      = searchParams.get('college') || '';
   const course       = searchParams.get('course') || '';
   const year         = searchParams.get('year') || '';
+  const amount       = searchParams.get('amount') || '399';
+
+  React.useEffect(() => {
+    if (!razorpayUrl) {
+      router.push('/register');
+    }
+  }, [router, razorpayUrl]);
 
   const [iframeReady, setIframeReady]   = useState(false);
   const [showIframe, setShowIframe]     = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const { token, refreshUser } = useAuth();
+  const [utrInput, setUtrInput] = useState('');
+  const [submittingUtr, setSubmittingUtr] = useState(false);
+  const [utrError, setUtrError] = useState('');
+
+  const handleSubmitUtr = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!utrInput.trim()) return;
+    setSubmittingUtr(true);
+    setUtrError('');
+    try {
+      const activeToken = token || localStorage.getItem('codesprint_token');
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api/payments/submit-utr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${activeToken}`
+        },
+        body: JSON.stringify({ utr: utrInput.trim() })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await refreshUser();
+        router.push('/register');
+      } else {
+        setUtrError(data.message || 'Failed to submit UTR.');
+        if (data.autoRejected) {
+          await refreshUser();
+          router.push('/register');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setUtrError('Network error. Please try again.');
+    } finally {
+      setSubmittingUtr(false);
+    }
+  };
 
   if (!razorpayUrl) {
     return (
@@ -213,7 +260,7 @@ function PayFrame() {
                 </div>
                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>Hackathon Entry · CodeSprint 2026</div>
               </div>
-              <div style={{ color: '#c4b5fd', fontSize: 26, fontWeight: 900, letterSpacing: '-0.03em' }}>₹399</div>
+              <div style={{ color: '#c4b5fd', fontSize: 26, fontWeight: 900, letterSpacing: '-0.03em' }}>₹{amount}</div>
             </div>
           </div>
 
@@ -236,7 +283,7 @@ function PayFrame() {
               }}
             >
               {iframeReady ? (
-                <><CreditCard size={18} /> Pay ₹399.00 via Razorpay</>
+                <><CreditCard size={18} /> Pay ₹{amount} via Razorpay</>
               ) : (
                 <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Preparing secure payment...</>
               )}
@@ -249,6 +296,48 @@ function PayFrame() {
             }}>
               <Lock size={9} /> Secured by Razorpay · Axis Bank Payment Gateway
             </p>
+
+            {/* UTR Input Form */}
+            <form onSubmit={handleSubmitUtr} style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <p style={{ color: '#c4b5fd', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.05em' }}>
+                Step 2: Enter Transaction UTR Number
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, lineHeight: 1.4, marginBottom: 12 }}>
+                After completing the payment in the Razorpay window, copy the 12-digit UTR (Unique Transaction Reference) / Ref No. and submit it below to request activation.
+              </p>
+              
+              {utrError && (
+                <div style={{ padding: 10, borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: 11, marginBottom: 12 }}>
+                  {utrError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="text"
+                  placeholder="12-digit UTR / Txn ID"
+                  required
+                  value={utrInput}
+                  onChange={(e) => setUtrInput(e.target.value.replace(/\s+/g, ''))}
+                  style={{
+                    flex: 1, padding: '10px 14px', borderRadius: 10,
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff', fontSize: 12, outline: 'none'
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={submittingUtr || utrInput.length < 12}
+                  style={{
+                    padding: '10px 16px', borderRadius: 10, border: 'none',
+                    background: utrInput.length >= 12 ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(124,58,237,0.3)',
+                    color: '#fff', fontSize: 12, fontWeight: 700, cursor: utrInput.length >= 12 ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  {submittingUtr ? 'Submitting...' : 'Submit UTR'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

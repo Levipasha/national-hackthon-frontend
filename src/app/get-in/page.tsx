@@ -17,6 +17,8 @@ interface PublicTeam {
   leaderName: string;
   members: string[];
   remainingSlots: number;
+  availableSlots?: number;
+  teamStatus?: 'OPEN' | 'CLOSED';
   joinRequests: any[];
 }
 
@@ -90,7 +92,7 @@ function CreateTeamTab({ token, onCreated }: { token: string; onCreated: () => v
               placeholder="e.g. Pixel Pioneers"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500/50 text-sm transition-all"
+              className="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-purple-500/50 text-sm transition-all"
               maxLength={40}
             />
           </div>
@@ -102,7 +104,7 @@ function CreateTeamTab({ token, onCreated }: { token: string; onCreated: () => v
               value={desc}
               onChange={e => setDesc(e.target.value)}
               rows={3}
-              className="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500/50 text-sm transition-all resize-none"
+              className="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-purple-500/50 text-sm transition-all resize-none"
               maxLength={200}
             />
           </div>
@@ -147,7 +149,7 @@ function JoinTeamTab({ token, userId }: { token: string; userId: string }) {
         setTeams(list);
         const pending: Record<string, boolean> = {};
         list.forEach(t => {
-          if (t.joinRequests?.some((r: any) => r.userId === userId && r.status === 'pending')) {
+          if (t.joinRequests?.some((r: any) => r.userId === userId && (r.status === 'pending' || r.status === 'PENDING'))) {
             pending[t.id] = true;
           }
         });
@@ -221,7 +223,7 @@ function JoinTeamTab({ token, userId }: { token: string; userId: string }) {
                 {/* Top */}
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-200 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
-                    <School className="h-3 w-3 text-purple-600" />
+                    <School className="h-3 w-3 text-purple-650" />
                     {team.college}
                   </div>
                   <span className="text-[10px] font-bold font-mono text-emerald-600 uppercase tracking-wider animate-pulse">Open</span>
@@ -229,8 +231,13 @@ function JoinTeamTab({ token, userId }: { token: string; userId: string }) {
 
                 {/* Name + leader */}
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-snug">{team.name}</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Leader: <span className="text-slate-700 font-semibold">{team.leaderName}</span></p>
+                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                    <h3 className="text-sm font-bold text-slate-905 leading-snug">{team.name}</h3>
+                    <span className="text-[9px] bg-purple-50 border border-purple-200 text-purple-700 font-bold px-1.5 py-0.5 rounded font-mono">
+                      {team.id}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-505 mt-0.5">Leader: <span className="text-slate-700 font-semibold">{team.leaderName}</span></p>
                   {team.description && (
                     <p className="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2">{team.description}</p>
                   )}
@@ -239,10 +246,12 @@ function JoinTeamTab({ token, userId }: { token: string; userId: string }) {
                 {/* Members */}
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
                   <div>
-                    <p className="text-[9px] text-slate-450 uppercase font-bold tracking-widest mb-1">Members</p>
+                    <p className="text-[9px] text-slate-450 uppercase font-bold tracking-widest mb-1">Members ({memberCount}/5)</p>
                     {memberDots(memberCount)}
                   </div>
-                  <span className="text-[10px] text-slate-500 font-medium">{5 - memberCount} slot{ (5 - memberCount) !== 1 ? 's' : ''} left</span>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    {team.availableSlots !== undefined ? team.availableSlots : (5 - memberCount)} slot{(team.availableSlots !== undefined ? team.availableSlots : (5 - memberCount)) !== 1 ? 's' : ''} open
+                  </span>
                 </div>
 
                 {/* Action */}

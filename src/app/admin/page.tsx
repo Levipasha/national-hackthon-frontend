@@ -281,6 +281,30 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleVerifyExtraSlots = async (teamId: string, action: 'approve' | 'reject') => {
+    if (!token) return;
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/admin/verify-extra-slots', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ teamId, action })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        addToast('Success', `Slots request has been ${action}d successfully.`, 'success');
+        fetchAdminTeams(); // refresh list
+      } else {
+        addToast('Error', data.message || 'Verification failed.', 'warning');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Error', 'Network error verifying extra slots.', 'warning');
+    }
+  };
+
   // Merge Teams
   const handleMergeTeams = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1019,13 +1043,37 @@ export default function AdminDashboard() {
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-zinc-200 text-xs">{t.name}</span>
                               <span className="text-[9px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-bold font-mono uppercase">
-                                {t.memberCount} / 4 Members
+                                {t.memberCount} / {t.paidSlots || 1} slots
                               </span>
                             </div>
                             <div className="text-[10px] text-zinc-500 mt-1 space-x-2">
                               <span>College: <strong className="text-zinc-400">{t.college}</strong></span>
                               <span>• Leader: <strong className="text-zinc-400">{t.leaderName}</strong></span>
                             </div>
+
+                            {/* Extra Slots Pending Approval */}
+                            {t.extraSlotsStatus === 'submitted' && (
+                              <div className="mt-2.5 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xxs flex items-center justify-between gap-3 text-amber-400">
+                                <div>
+                                  <p>Requesting <span className="font-bold text-white">+{t.extraSlotsPending} Extra Slots</span></p>
+                                  <p className="text-[9px] font-mono text-zinc-400 mt-0.5">UTR: {t.extraSlotsUtr}</p>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    onClick={() => handleVerifyExtraSlots(t.id, 'approve')}
+                                    className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold transition-all cursor-pointer text-[9px]"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleVerifyExtraSlots(t.id, 'reject')}
+                                    className="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded font-bold transition-all cursor-pointer text-[9px]"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           <button

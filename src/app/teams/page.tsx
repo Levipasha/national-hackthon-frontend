@@ -14,6 +14,7 @@ interface Team {
   leaderId: string;
   leaderName: string;
   members: string[];
+  membersList?: { name: string; gender: string; }[];
   remainingSlots: number;
   status: 'open' | 'full';
   inviteLink: string;
@@ -293,6 +294,26 @@ export default function TeamsPage() {
                     <p className="text-xs text-slate-600 mt-3.5 leading-relaxed line-clamp-3">
                       {team.description}
                     </p>
+
+                    {/* Members List with Name and Gender */}
+                    {team.membersList && team.membersList.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-slate-100/60 space-y-2">
+                        {team.membersList.map((m: any, idx: number) => (
+                          <div key={idx} className="flex justify-between items-center text-xs">
+                            <span className="font-semibold text-slate-700">{m.name}</span>
+                            <span 
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                m.gender?.toLowerCase() === 'female' 
+                                  ? 'bg-pink-50/50 border-pink-100 text-pink-700' 
+                                  : 'bg-blue-50/50 border-blue-100 text-blue-700'
+                              }`}
+                            >
+                              {m.gender}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Footer / Slots & Actions */}

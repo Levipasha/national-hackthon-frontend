@@ -291,9 +291,12 @@ export default function Navbar() {
 
                 {/* Profile Details */}
                 <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-                  <Link href="/dashboard" className="flex flex-col text-right hover:opacity-80 transition-opacity cursor-pointer">
+                  <Link 
+                    href={user.paymentStatus === 'paid' ? '/dashboard' : '/register'} 
+                    className="flex flex-col text-right hover:opacity-80 transition-opacity cursor-pointer"
+                  >
                     <span className="text-xs font-bold text-slate-800 max-w-[120px] truncate">{user.name}</span>
-                    <span className="text-[10px] text-slate-400 capitalize hover:text-slate-500">{user.role.replace('-', ' ')}</span>
+                    <span className="text-[10px] text-slate-455 capitalize hover:text-slate-500">{user.role.replace('-', ' ')}</span>
                   </Link>
                   <button
                     onClick={handleLogout}
@@ -370,21 +373,25 @@ export default function Navbar() {
           </Link>
           {user && (
             <Link
-              href="/dashboard"
+              href={user.paymentStatus === 'paid' ? '/dashboard' : '/register'}
               onClick={() => setMobileMenuOpen(false)}
               className={`px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${
-                pathname.startsWith('/dashboard') ? 'bg-slate-50 text-slate-900' : 'text-slate-500 hover:text-slate-900'
+                pathname.startsWith('/dashboard') || pathname.startsWith('/register') ? 'bg-slate-50 text-slate-900' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <LayoutDashboard className="h-4.5 w-4.5" />
-              Dashboard
+              {user.paymentStatus === 'paid' ? 'Dashboard' : 'Payment Status'}
             </Link>
           )}
 
           {user ? (
             <div className="border-t border-slate-100 pt-3 mt-1 flex flex-col gap-2">
               <div className="flex items-center justify-between px-3 py-1">
-                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer">
+                <Link 
+                  href={user.paymentStatus === 'paid' ? '/dashboard' : '/register'} 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer"
+                >
                   <span className="text-sm font-bold text-slate-800">{user.name}</span>
                   <span className="text-[10px] text-slate-450 capitalize">{user.role.replace('-', ' ')}</span>
                 </Link>

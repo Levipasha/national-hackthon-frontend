@@ -119,7 +119,7 @@ export default function LandingPage() {
   const [albums, setAlbums] = useState<any[]>([]);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [coordinators, setCoordinators] = useState<any[]>([]);
-  const [selectedAlbum, setSelectedAlbum] = useState<any | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -358,50 +358,48 @@ export default function LandingPage() {
       </section>
 
       {/* Highlights & Album Snaps Section */}
-      {albums.length > 0 && (
-        <section className="py-24 bg-section-blue border-y border-blue-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+      {albums.length > 0 && (() => {
+        const allImages = albums.flatMap(album => album.images || []);
+        if (allImages.length === 0) return null;
+        
+        // Replicate the list to ensure there's enough content to scroll seamlessly
+        const marqueeImages = [...allImages, ...allImages, ...allImages];
+
+        return (
+          <section className="pt-8 pb-10 bg-section-blue border-y border-blue-100 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 text-center">
               <span className="text-xs font-bold text-purple-600 uppercase tracking-widest font-mono">GALLERY</span>
-              <h2 className="text-3xl font-bold text-slate-900 mt-2">Past Highlights & Album Snaps</h2>
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">Past Highlights & Snaps</h2>
               <p className="text-slate-500 text-xs sm:text-sm mt-2 max-w-2xl mx-auto">
                 Take a walk down memory lane and discover the spirit of collaboration, coding, and celebration in our past events.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...albums].sort((a, b) => b.isPinned - a.isPinned).map((album, idx) => (
-                <div 
-                  key={idx} 
-                  className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-purple-200 hover:-translate-y-1 transition-all cursor-pointer group"
-                  onClick={() => setSelectedAlbum(album)}
-                >
-                  <div className="h-40 rounded-2xl bg-slate-100 overflow-hidden relative mb-4">
-                    {album.coverImageUrl ? (
-                      <img src={album.coverImageUrl} alt={album.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
-                        <FolderOpen size={40} className="mb-2" />
-                      </div>
-                    )}
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5">
-                      <ImageIcon size={12} className="text-purple-600" />
-                      {album.images?.length || 0} Snaps
-                    </div>
-                    {album.isPinned && (
-                      <div className="absolute top-3 right-3 bg-amber-400/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-white">
-                        <Star size={12} fill="currentColor" />
-                      </div>
-                    )}
+            <div className="w-full overflow-hidden select-none relative">
+              {/* Fade overlays on the sides for premium look */}
+              <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#eff6ff] to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#eff6ff] to-transparent z-10 pointer-events-none" />
+
+              <div className="animate-marquee-scroll flex gap-6 py-4">
+                {marqueeImages.map((img, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex-shrink-0 w-96 h-60 rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer bg-white p-2"
+                    onClick={() => setSelectedImage(img)}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`past-highlight-${idx}`} 
+                      className="w-full h-full object-cover rounded-2xl" 
+                      loading="lazy" 
+                    />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-sm truncate">{album.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{album.description}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* Why Participate & Highlights Grid */}
       <section className="py-24 bg-white/70 backdrop-blur-sm border-y border-blue-100">
@@ -521,17 +519,6 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              {/* Action button */}
-              <Link
-                href="/register"
-                className={`w-full h-11 flex items-center justify-center font-bold text-xs uppercase tracking-wider rounded-xl transition-all border ${
-                  tier.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 border-transparent shadow-md shadow-blue-200'
-                    : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200'
-                }`}
-              >
-                Register to Win
-              </Link>
             </div>
           ))}
         </div>
@@ -638,18 +625,23 @@ export default function LandingPage() {
                 Faculty Coordinators & Mentors
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {coordinators.filter(c => c.role.toLowerCase().includes('faculty') || c.role.toLowerCase().includes('dean') || c.role.toLowerCase().includes('professor')).map((fc, idx) => (
+                {coordinators.filter(c => {
+                  const roleLower = (c.role || '').toLowerCase();
+                  return roleLower.includes('faculty') || roleLower.includes('dean') || roleLower.includes('professor');
+                }).map((fc, idx) => (
                   <div key={idx} className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5 hover:border-blue-200 hover:bg-blue-50 transition-all flex gap-3 items-center">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${fc.color}22`, color: fc.color, border: `1px solid ${fc.color}55` }}>
-                      {fc.avatar}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${fc.color || '#3b82f6'}22`, color: fc.color || '#3b82f6', border: `1px solid ${fc.color || '#3b82f6'}55` }}>
+                      {fc.avatar || (fc.name || '').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '??'}
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{fc.role}</span>
+                      {fc.role && <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{fc.role}</span>}
                       <h4 className="text-sm font-bold text-slate-800 mt-0.5">{fc.name}</h4>
-                      <a href={`tel:${fc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
-                        <Phone className="h-3.5 w-3.5" />
-                        {fc.phone}
-                      </a>
+                      {fc.phone && (
+                        <a href={`tel:${fc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
+                          <Phone className="h-3.5 w-3.5" />
+                          {fc.phone}
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -663,18 +655,23 @@ export default function LandingPage() {
                 Student Coordinators
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {coordinators.filter(c => !c.role.toLowerCase().includes('faculty') && !c.role.toLowerCase().includes('dean') && !c.role.toLowerCase().includes('professor')).map((sc, idx) => (
+                {coordinators.filter(c => {
+                  const roleLower = (c.role || '').toLowerCase();
+                  return !roleLower.includes('faculty') && !roleLower.includes('dean') && !roleLower.includes('professor');
+                }).map((sc, idx) => (
                   <div key={idx} className="bg-rose-50/60 border border-rose-100 rounded-2xl p-5 hover:border-rose-200 hover:bg-rose-50 transition-all flex gap-3 items-center">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${sc.color}22`, color: sc.color, border: `1px solid ${sc.color}55` }}>
-                      {sc.avatar}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm" style={{ backgroundColor: `${sc.color || '#3b82f6'}22`, color: sc.color || '#3b82f6', border: `1px solid ${sc.color || '#3b82f6'}55` }}>
+                      {sc.avatar || (sc.name || '').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '??'}
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{sc.role}</span>
+                      {sc.role && <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold font-mono block">{sc.role}</span>}
                       <h4 className="text-sm font-bold text-slate-800 mt-0.5">{sc.name}</h4>
-                      <a href={`tel:${sc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
-                        <Phone className="h-3.5 w-3.5" />
-                        {sc.phone}
-                      </a>
+                      {sc.phone && (
+                        <a href={`tel:${sc.phone}`} className="text-xs text-purple-600 hover:text-purple-800 font-bold mt-1 inline-flex items-center gap-1.5 font-mono">
+                          <Phone className="h-3.5 w-3.5" />
+                          {sc.phone}
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -873,38 +870,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Lightbox Modal for Albums */}
-      {selectedAlbum && (
-        <div className="fixed inset-0 z-[100] bg-[#1B2336]/80 backdrop-blur-md flex flex-col p-4 sm:p-8 animate-in fade-in duration-200">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-white">{selectedAlbum.title}</h3>
-              <p className="text-xs text-slate-400 mt-1">{selectedAlbum.description}</p>
-            </div>
-            <button 
-              onClick={() => setSelectedAlbum(null)}
-              className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {selectedAlbum.images && selectedAlbum.images.length > 0 ? (
-              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-                {selectedAlbum.images.map((img: string, i: number) => (
-                  <div key={i} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                    <img src={img} alt={`album-snap-${i}`} className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                <ImageIcon size={48} className="mb-4 opacity-50" />
-                <p>No snaps available in this album yet.</p>
-              </div>
-            )}
-          </div>
+      {/* Fullscreen Lightbox Modal for Images */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-200" 
+          onClick={() => setSelectedImage(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2.5 transition-colors cursor-pointer"
+            onClick={() => setSelectedImage(null)}
+          >
+            <X size={24} />
+          </button>
+          <img 
+            src={selectedImage} 
+            alt="Fullscreen Snap" 
+            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200" 
+          />
         </div>
       )}
 

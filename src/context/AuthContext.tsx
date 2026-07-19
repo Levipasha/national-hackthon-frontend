@@ -8,20 +8,28 @@ export interface User {
   email: string;
   phone: string;
   college: string;
+  rollNumber?: string;
   branch: string;
   year: string;
   gender: string;
   linkedin: string;
   portfolio?: string;
   teamPreference?: string;
+  tempTeamName?: string;
+  tempTeamCode?: string;
+  tempSlots?: number;
   role: 'admin' | 'team-leader' | 'participant';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
+  paymentStatus: 'pending' | 'submitted' | 'paid' | 'rejected' | 'refunded';
   paymentId?: string;
+  utr?: string;
   couponUsed?: string;
   amountPaid: number;
   teamId?: string;
   teamRole?: 'leader' | 'member';
+  foodPreference?: 'Veg' | 'Non-Veg';
+  tshirtSize?: 'S' | 'M' | 'L' | 'XL' | 'XXL';
   checkedIn: boolean;
+  checkInTime?: string;
   createdAt: string;
 }
 
@@ -47,6 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(() => {
     localStorage.removeItem('codesprint_token');
+    // Clear any stale registration flow session data
+    sessionStorage.removeItem('cs_individual_details');
+    sessionStorage.removeItem('cs_reg_mode');
     setToken(null);
     setUser(null);
     setLoading(false);
