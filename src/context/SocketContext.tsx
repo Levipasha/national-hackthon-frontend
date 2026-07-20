@@ -77,7 +77,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [user, refreshTrigger]);
 
   useEffect(() => {
-    // Always connect to Socket server to receive public broadcasts
+    // Socket.IO requires persistent connections — not supported on Vercel serverless.
+    // Only connect in local development; in production, notifications are handled via REST polling.
+    const isDev = process.env.NODE_ENV === 'development';
+    if (!isDev) {
+      return;
+    }
+
     const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
       withCredentials: true,
       transports: ['websocket', 'polling']
@@ -87,11 +93,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     socketInstance.on('connect', () => {
       console.log('[Socket] Connected to server');
-      
+
       // If user is logged in, join authenticated rooms
       if (user) {
         socketInstance.emit('join_user_room', user.id);
-        
+
         if (user.teamId) {
           socketInstance.emit('join_team_room', user.teamId);
         }
@@ -107,8 +113,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Handle incoming join response for requester
     socketInstance.on('request_response_received', (data: { teamId: string; status: 'approved' | 'rejected'; message: string }) => {
       addToast(
-        data.status === 'approved' ? 'Request Approved!' : 'Request Declined', 
-        data.message, 
+        data.status === 'approved' ? 'Request Approved!' : 'Request Declined',
+        data.message,
         data.status === 'approved' ? 'success' : 'warning'
       );
       triggerRefreshNotifications();
