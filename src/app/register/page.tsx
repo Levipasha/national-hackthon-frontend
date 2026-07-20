@@ -118,6 +118,9 @@ function RegisterForm() {
   const [customMemberBranch, setCustomMemberBranch] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [duplicatePhones, setDuplicatePhones] = useState<Record<string, boolean>>({});
+  const [duplicateEmails, setDuplicateEmails] = useState<Record<string, boolean>>({});
+  const [duplicateRolls, setDuplicateRolls] = useState<Record<string, boolean>>({});
   const [successMsg, setSuccessMsg] = useState('');
 
   // Payment states
@@ -233,11 +236,86 @@ function RegisterForm() {
 
 
 
+  // Check duplicate phone numbers in the database
+  const checkPhoneDuplicate = async (phone: string) => {
+    if (phone.length === 10) {
+      try {
+        const res = await fetch((process.env.NEXT_PUBLIC_API_URL || '') + '/api/users/check-duplicate?phone=' + phone);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.exists) {
+            setDuplicatePhones(prev => ({ ...prev, [phone]: true }));
+            return true;
+          } else {
+            setDuplicatePhones(prev => { const next = { ...prev }; delete next[phone]; return next; });
+          }
+        }
+      } catch (err) {
+        console.error('Error checking phone duplicate:', err);
+      }
+    }
+    return false;
+  };
+
+  // Check duplicate emails — triggers when email looks complete (ends with .com/.in/.org etc.)
+  const checkEmailDuplicate = async (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (emailRegex.test(email)) {
+      try {
+        const res = await fetch((process.env.NEXT_PUBLIC_API_URL || '') + '/api/users/check-duplicate?email=' + encodeURIComponent(email));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.exists) {
+            setDuplicateEmails(prev => ({ ...prev, [email.toLowerCase()]: true }));
+            return true;
+          } else {
+            setDuplicateEmails(prev => { const next = { ...prev }; delete next[email.toLowerCase()]; return next; });
+          }
+        }
+      } catch (err) {
+        console.error('Error checking email duplicate:', err);
+      }
+    } else {
+      // Clear stale warning if email is being edited
+      setDuplicateEmails(prev => { const next = { ...prev }; delete next[email.toLowerCase()]; return next; });
+    }
+    return false;
+  };
+
+  // Check duplicate roll/ID numbers — triggers on blur
+  const checkRollDuplicate = async (rollNumber: string) => {
+    const clean = rollNumber.trim().toUpperCase();
+    if (!clean) return false;
+    try {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL || '') + '/api/users/check-duplicate?rollNumber=' + encodeURIComponent(clean));
+      if (res.ok) {
+        const data = await res.json();
+        if (data.exists) {
+          setDuplicateRolls(prev => ({ ...prev, [clean]: true }));
+          return true;
+        } else {
+          setDuplicateRolls(prev => { const next = { ...prev }; delete next[clean]; return next; });
+        }
+      }
+    } catch (err) {
+      console.error('Error checking roll duplicate:', err);
+    }
+    return false;
+  };
+
   // Handle Leader details change
   const handleLeaderChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     let value = e.target.value;
     if (e.target.id === 'phone') {
       value = value.replace(/\D/g, '').slice(0, 10);
+      if (value.length === 10) {
+        checkPhoneDuplicate(value);
+      } else {
+        setDuplicatePhones(prev => { const next = { ...prev }; const old = leaderDetails.phone; if (old) delete next[old]; return next; });
+      }
+    }
+    if (e.target.id === 'email') {
+      checkEmailDuplicate(value);
     }
     setLeaderDetails(prev => ({ ...prev, [e.target.id]: value }));
   };
@@ -247,6 +325,14 @@ function RegisterForm() {
     let value = e.target.value;
     if (e.target.id === 'phone') {
       value = value.replace(/\D/g, '').slice(0, 10);
+      if (value.length === 10) {
+        checkPhoneDuplicate(value);
+      } else {
+        setDuplicatePhones(prev => { const next = { ...prev }; const old = individualDetails.phone; if (old) delete next[old]; return next; });
+      }
+    }
+    if (e.target.id === 'email') {
+      checkEmailDuplicate(value);
     }
     setIndividualDetails(prev => ({ ...prev, [e.target.id]: value }));
   };
@@ -256,6 +342,14 @@ function RegisterForm() {
     let value = e.target.value;
     if (e.target.id === 'm_phone') {
       value = value.replace(/\D/g, '').slice(0, 10);
+      if (value.length === 10) {
+        checkPhoneDuplicate(value);
+      } else {
+        setDuplicatePhones(prev => { const next = { ...prev }; const old = memberForm.phone; if (old) delete next[old]; return next; });
+      }
+    }
+    if (e.target.id === 'm_email') {
+      checkEmailDuplicate(value);
     }
     const fieldId = e.target.id.replace('m_', '');
     setMemberForm(prev => ({ ...prev, [fieldId]: value }));
@@ -307,9 +401,12 @@ function RegisterForm() {
     if (!leaderDetails.name.trim()) return setErrorMsg('Leader name is required.');
     if (!leaderDetails.email.trim()) return setErrorMsg('Leader email is required.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leaderDetails.email.trim())) return setErrorMsg('Invalid email address.');
+    if (duplicateEmails[leaderDetails.email.toLowerCase().trim()]) return setErrorMsg(`Email ${leaderDetails.email} is already registered.`);
     if (!/^\d{10}$/.test(leaderDetails.phone)) return setErrorMsg('Phone number must be exactly 10 digits.');
+    if (duplicatePhones[leaderDetails.phone]) return setErrorMsg(`Phone number ${leaderDetails.phone} is already registered.`);
     if (!leaderDetails.college.trim()) return setErrorMsg('Please enter or select your college.');
     if (!leaderDetails.rollNumber.trim()) return setErrorMsg('Roll number is required.');
+    if (duplicateRolls[leaderDetails.rollNumber.trim().toUpperCase()]) return setErrorMsg(`Roll/ID number ${leaderDetails.rollNumber} is already registered.`);
     if (!leaderDetails.branch) return setErrorMsg('Branch/Dept is required.');
     if (leaderDetails.branch === 'Other' && !customLeaderBranch.trim()) {
       return setErrorMsg('Please enter your custom Branch/Dept name.');
@@ -326,8 +423,11 @@ function RegisterForm() {
     if (!memberForm.name.trim()) return setErrorMsg('Member name is required.');
     if (!memberForm.email.trim()) return setErrorMsg('Member email is required.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberForm.email.trim())) return setErrorMsg('Invalid member email.');
+    if (duplicateEmails[memberForm.email.toLowerCase().trim()]) return setErrorMsg(`Email ${memberForm.email} is already registered.`);
     if (!/^\d{10}$/.test(memberForm.phone)) return setErrorMsg('Member phone must be exactly 10 digits.');
+    if (duplicatePhones[memberForm.phone]) return setErrorMsg(`Phone number ${memberForm.phone} is already registered.`);
     if (!memberForm.rollNumber.trim()) return setErrorMsg('Member roll number is required.');
+    if (duplicateRolls[memberForm.rollNumber.trim().toUpperCase()]) return setErrorMsg(`Roll/ID number ${memberForm.rollNumber} is already registered.`);
     if (!memberForm.college.trim()) return setErrorMsg('Member college is required.');
     if (!memberForm.branch) return setErrorMsg('Member branch is required.');
     if (memberForm.branch === 'Other' && !customMemberBranch.trim()) {
@@ -422,6 +522,13 @@ function RegisterForm() {
     if (!hasFemaleParticipant()) {
       return setErrorMsg('At least one female participant is mandatory for every team.');
     }
+    if (duplicatePhones[leaderDetails.phone]) {
+      return setErrorMsg(`The Team Leader phone number (${leaderDetails.phone}) is already registered.`);
+    }
+    if (addedMembers.some(m => duplicatePhones[m.phone])) {
+      const dup = addedMembers.find(m => duplicatePhones[m.phone]);
+      return setErrorMsg(`Member phone number (${dup?.phone}) is already registered.`);
+    }
 
     setLoading(true);
     try {
@@ -500,8 +607,11 @@ function RegisterForm() {
     if (!individualDetails.name.trim()) return setErrorMsg('Name is required.');
     if (!individualDetails.email.trim()) return setErrorMsg('Email is required.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(individualDetails.email.trim())) return setErrorMsg('Invalid email address.');
+    if (duplicateEmails[individualDetails.email.toLowerCase().trim()]) return setErrorMsg(`Email ${individualDetails.email} is already registered.`);
     if (!/^\d{10}$/.test(individualDetails.phone)) return setErrorMsg('Phone number must be exactly 10 digits.');
+    if (duplicatePhones[individualDetails.phone]) return setErrorMsg(`Phone number ${individualDetails.phone} is already registered.`);
     if (!individualDetails.college.trim()) return setErrorMsg('Please enter or select your college.');
+    if (duplicateRolls[individualDetails.rollNumber.trim().toUpperCase()]) return setErrorMsg(`Roll/ID number ${individualDetails.rollNumber} is already registered.`);
     if (!individualDetails.rollNumber.trim()) return setErrorMsg('Roll number is required.');
     if (!individualDetails.branch) return setErrorMsg('Branch/Specialization is required.');
     if (individualDetails.branch === 'Other' && !customIndividualBranch.trim()) {
@@ -939,10 +1049,18 @@ function RegisterForm() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Email Address</label>
                   <input type="email" required id="email" value={leaderDetails.email} onChange={handleLeaderChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                  {duplicateEmails[leaderDetails.email.toLowerCase().trim()] && (
+                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Phone Number (10 digit)</label>
                   <input type="text" required id="phone" value={leaderDetails.phone} onChange={handleLeaderChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                  {duplicatePhones[leaderDetails.phone] && (
+                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
+                      ⚠️ This phone number is already registered.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">College Name</label>
@@ -959,7 +1077,18 @@ function RegisterForm() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Roll Number</label>
-                  <input type="text" required id="rollNumber" value={leaderDetails.rollNumber} onChange={handleLeaderChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                  <input
+                    type="text"
+                    required
+                    id="rollNumber"
+                    value={leaderDetails.rollNumber}
+                    onChange={handleLeaderChange}
+                    onBlur={e => checkRollDuplicate(e.target.value)}
+                    className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                  />
+                  {duplicateRolls[leaderDetails.rollNumber.trim().toUpperCase()] && (
+                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Branch / Dept</label>
@@ -1068,14 +1197,33 @@ function RegisterForm() {
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">Email Address</label>
                       <input type="email" required id="m_email" value={memberForm.email} onChange={handleMemberChange} className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" />
+                      {duplicateEmails[memberForm.email.toLowerCase().trim()] && (
+                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">Phone Number</label>
                       <input type="text" required id="m_phone" value={memberForm.phone} onChange={handleMemberChange} className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" />
+                      {duplicatePhones[memberForm.phone] && (
+                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
+                          ⚠️ This phone number is already registered.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">Roll Number</label>
-                      <input type="text" required id="m_rollNumber" value={memberForm.rollNumber} onChange={handleMemberChange} className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" />
+                      <input
+                        type="text"
+                        required
+                        id="m_rollNumber"
+                        value={memberForm.rollNumber}
+                        onChange={handleMemberChange}
+                        onBlur={e => checkRollDuplicate(e.target.value)}
+                        className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs"
+                      />
+                      {duplicateRolls[memberForm.rollNumber.trim().toUpperCase()] && (
+                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">College Name</label>
@@ -1509,10 +1657,18 @@ function RegisterForm() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Email Address</label>
                 <input type="email" required id="email" value={individualDetails.email} onChange={handleIndividualChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                {duplicateEmails[individualDetails.email.toLowerCase().trim()] && (
+                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Phone Number (10 digit)</label>
                 <input type="text" required id="phone" value={individualDetails.phone} onChange={handleIndividualChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                {duplicatePhones[individualDetails.phone] && (
+                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
+                    ⚠️ This phone number is already registered.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">College Name</label>
@@ -1529,7 +1685,18 @@ function RegisterForm() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Roll Number</label>
-                <input type="text" required id="rollNumber" value={individualDetails.rollNumber} onChange={handleIndividualChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                <input
+                  type="text"
+                  required
+                  id="rollNumber"
+                  value={individualDetails.rollNumber}
+                  onChange={handleIndividualChange}
+                  onBlur={e => checkRollDuplicate(e.target.value)}
+                  className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                />
+                {duplicateRolls[individualDetails.rollNumber.trim().toUpperCase()] && (
+                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Branch / Specialization</label>
