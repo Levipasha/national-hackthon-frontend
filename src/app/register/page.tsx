@@ -1123,7 +1123,7 @@ function RegisterForm() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Email Address</label>
                   <input type="email" required id="email" value={leaderDetails.email} onChange={handleLeaderChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
                   {duplicateEmails[leaderDetails.email.toLowerCase().trim()] && (
-                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered or matches another member.</p>
                   )}
                 </div>
                 <div>
@@ -1131,7 +1131,7 @@ function RegisterForm() {
                   <input type="text" required id="phone" value={leaderDetails.phone} onChange={handleLeaderChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
                   {duplicatePhones[leaderDetails.phone] && (
                     <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
-                      ⚠️ This phone number is already registered.
+                      ⚠️ This phone number is already registered or matches another member.
                     </p>
                   )}
                 </div>
@@ -1156,11 +1156,11 @@ function RegisterForm() {
                     id="rollNumber"
                     value={leaderDetails.rollNumber}
                     onChange={handleLeaderChange}
-                    onBlur={e => checkRollDuplicate(e.target.value)}
+                    onBlur={e => checkRollDuplicate(e.target.value, 'rollNumber')}
                     className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
                   />
                   {duplicateRolls[leaderDetails.rollNumber.trim().toUpperCase()] && (
-                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                    <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered or matches another member.</p>
                   )}
                 </div>
                 <div>
@@ -1271,7 +1271,7 @@ function RegisterForm() {
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">Email Address</label>
                       <input type="email" required id="m_email" value={memberForm.email} onChange={handleMemberChange} className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" />
                       {duplicateEmails[memberForm.email.toLowerCase().trim()] && (
-                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered or matches another member.</p>
                       )}
                     </div>
                     <div>
@@ -1279,7 +1279,7 @@ function RegisterForm() {
                       <input type="text" required id="m_phone" value={memberForm.phone} onChange={handleMemberChange} className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" />
                       {duplicatePhones[memberForm.phone] && (
                         <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
-                          ⚠️ This phone number is already registered.
+                          ⚠️ This phone number is already registered or matches another member.
                         </p>
                       )}
                     </div>
@@ -1291,11 +1291,11 @@ function RegisterForm() {
                         id="m_rollNumber"
                         value={memberForm.rollNumber}
                         onChange={handleMemberChange}
-                        onBlur={e => checkRollDuplicate(e.target.value)}
+                        onBlur={e => checkRollDuplicate(e.target.value, 'm_rollNumber')}
                         className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs"
                       />
                       {duplicateRolls[memberForm.rollNumber.trim().toUpperCase()] && (
-                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                        <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered or matches another member.</p>
                       )}
                     </div>
                     <div>
@@ -1731,7 +1731,7 @@ function RegisterForm() {
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Email Address</label>
                 <input type="email" required id="email" value={individualDetails.email} onChange={handleIndividualChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
                 {duplicateEmails[individualDetails.email.toLowerCase().trim()] && (
-                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered.</p>
+                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This email is already registered or matches another member.</p>
                 )}
               </div>
               <div>
@@ -1739,7 +1739,7 @@ function RegisterForm() {
                 <input type="text" required id="phone" value={individualDetails.phone} onChange={handleIndividualChange} className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
                 {duplicatePhones[individualDetails.phone] && (
                   <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">
-                    ⚠️ This phone number is already registered.
+                    ⚠️ This phone number is already registered or matches another member.
                   </p>
                 )}
               </div>
@@ -1764,11 +1764,11 @@ function RegisterForm() {
                   id="rollNumber"
                   value={individualDetails.rollNumber}
                   onChange={handleIndividualChange}
-                  onBlur={e => checkRollDuplicate(e.target.value)}
+                  onBlur={e => checkRollDuplicate(e.target.value, 'rollNumber')}
                   className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
                 />
                 {duplicateRolls[individualDetails.rollNumber.trim().toUpperCase()] && (
-                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered.</p>
+                  <p className="text-[10px] text-rose-500 font-medium mt-1 pl-1">⚠️ This Roll/ID number is already registered or matches another member.</p>
                 )}
               </div>
               <div>
