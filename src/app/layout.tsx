@@ -30,7 +30,7 @@ export default function RootLayout({
         <AuthProvider>
           <SocketProvider>
             <Navbar />
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-x-hidden">
               {children}
             </div>
             <Footer />

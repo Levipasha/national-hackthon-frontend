@@ -110,6 +110,16 @@ function RegisterForm() {
 
   // Dropdown options
   const [colleges, setColleges] = useState<any[]>([]);
+  const [showLeaderColleges, setShowLeaderColleges] = useState(false);
+  const [showMemberColleges, setShowMemberColleges] = useState(false);
+  const [showIndividualColleges, setShowIndividualColleges] = useState(false);
+
+  const getFilteredColleges = (query: string) => {
+    if (!query) return colleges.slice(0, 15);
+    const q = query.toLowerCase();
+    return colleges.filter((c: any) => c.name.toLowerCase().includes(q)).slice(0, 15);
+  };
+
   const [customLeaderCollege, setCustomLeaderCollege] = useState('');
   const [customIndividualCollege, setCustomIndividualCollege] = useState('');
   const [customMemberCollege, setCustomMemberCollege] = useState('');
@@ -940,7 +950,7 @@ function RegisterForm() {
   // Render Entry Screen Selection
   if (regMode === 'selection') {
     return (
-      <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
+      <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4 overflow-hidden" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
         <div className="absolute top-[-10%] left-[-15%] w-[45%] h-[45%] rounded-full bg-purple-100/50 blur-[100px] pointer-events-none -z-10" />
         <div className="absolute bottom-[-10%] right-[-15%] w-[45%] h-[45%] rounded-full bg-blue-100/50 blur-[100px] pointer-events-none -z-10" />
 
@@ -998,7 +1008,7 @@ function RegisterForm() {
   // Render CREATE TEAM Flow
   if (regMode === 'CREATE') {
     return (
-      <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
+      <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4 overflow-hidden" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
         <div className="absolute top-[-10%] left-[-15%] w-[45%] h-[45%] rounded-full bg-purple-100/50 blur-[100px] pointer-events-none -z-10" />
         <div className="absolute bottom-[-10%] right-[-15%] w-[45%] h-[45%] rounded-full bg-blue-100/50 blur-[100px] pointer-events-none -z-10" />
 
@@ -1108,16 +1118,35 @@ function RegisterForm() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">College Name</label>
-                  <input 
-                    type="text" 
-                    id="college" 
-                    list="college-options" 
-                    required 
-                    placeholder="Type to search or enter college name manually" 
-                    value={leaderDetails.college} 
-                    onChange={handleLeaderChange} 
-                    className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
-                  />
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      id="college" 
+                      required 
+                      placeholder="Type to search or enter college name manually" 
+                      value={leaderDetails.college} 
+                      onChange={handleLeaderChange} 
+                      onFocus={() => setShowLeaderColleges(true)}
+                      onBlur={() => setTimeout(() => setShowLeaderColleges(false), 200)}
+                      className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
+                    />
+                    {showLeaderColleges && getFilteredColleges(leaderDetails.college).length > 0 && (
+                      <div className="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100">
+                        {getFilteredColleges(leaderDetails.college).map((c: any) => (
+                          <div
+                            key={c.id}
+                            onMouseDown={() => {
+                              setLeaderDetails(prev => ({ ...prev, college: c.name }));
+                              setShowLeaderColleges(false);
+                            }}
+                            className="px-4 py-2.5 text-xs text-slate-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-colors"
+                          >
+                            {c.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Roll Number</label>
@@ -1271,16 +1300,35 @@ function RegisterForm() {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">College Name</label>
-                      <input 
-                        type="text" 
-                        id="m_college" 
-                        list="college-options" 
-                        required 
-                        placeholder="Type to search or enter college name manually" 
-                        value={memberForm.college} 
-                        onChange={handleMemberChange} 
-                        className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" 
-                      />
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          id="m_college" 
+                          required 
+                          placeholder="Type to search or enter college name manually" 
+                          value={memberForm.college} 
+                          onChange={handleMemberChange} 
+                          onFocus={() => setShowMemberColleges(true)}
+                          onBlur={() => setTimeout(() => setShowMemberColleges(false), 200)}
+                          className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" 
+                        />
+                        {showMemberColleges && getFilteredColleges(memberForm.college).length > 0 && (
+                          <div className="absolute z-50 left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100">
+                            {getFilteredColleges(memberForm.college).map((c: any) => (
+                              <div
+                                key={c.id}
+                                onMouseDown={() => {
+                                  setMemberForm(prev => ({ ...prev, college: c.name }));
+                                  setShowMemberColleges(false);
+                                }}
+                                className="px-3 py-2 text-xxs text-slate-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-colors"
+                              >
+                                {c.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase pl-1 mb-1">Branch / Specialization</label>
@@ -1669,11 +1717,7 @@ function RegisterForm() {
             </div>
           )}
 
-          <datalist id="college-options">
-            {colleges.map((c: any) => (
-              <option key={c.id} value={c.name} />
-            ))}
-          </datalist>
+
         </div>
       </div>
     );
@@ -1681,7 +1725,7 @@ function RegisterForm() {
 
   // Render JOIN TEAM Flow (Individual Registration)
   return (
-    <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
+    <div className="flex-1 w-full relative flex items-center justify-center py-20 px-4 overflow-hidden" style={{ background: 'url(/register-bg.jpg) no-repeat center center', backgroundSize: 'cover' }}>
       <div className="absolute top-[-10%] left-[-15%] w-[45%] h-[45%] rounded-full bg-purple-100/50 blur-[100px] pointer-events-none -z-10" />
       <div className="absolute bottom-[-10%] right-[-15%] w-[45%] h-[45%] rounded-full bg-blue-100/50 blur-[100px] pointer-events-none -z-10" />
 
@@ -1733,16 +1777,35 @@ function RegisterForm() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">College Name</label>
-                <input 
-                  type="text" 
-                  id="college" 
-                  list="college-options" 
-                  required 
-                  placeholder="Type to search or enter college name manually" 
-                  value={individualDetails.college} 
-                  onChange={handleIndividualChange} 
-                  className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
-                />
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    id="college" 
+                    required 
+                    placeholder="Type to search or enter college name manually" 
+                    value={individualDetails.college} 
+                    onChange={handleIndividualChange} 
+                    onFocus={() => setShowIndividualColleges(true)}
+                    onBlur={() => setTimeout(() => setShowIndividualColleges(false), 200)}
+                    className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
+                  />
+                  {showIndividualColleges && getFilteredColleges(individualDetails.college).length > 0 && (
+                    <div className="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100">
+                      {getFilteredColleges(individualDetails.college).map((c: any) => (
+                        <div
+                          key={c.id}
+                          onMouseDown={() => {
+                            setIndividualDetails(prev => ({ ...prev, college: c.name }));
+                            setShowIndividualColleges(false);
+                          }}
+                          className="px-4 py-2.5 text-xs text-slate-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-colors"
+                        >
+                          {c.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase pl-1">Roll Number</label>
@@ -1958,11 +2021,7 @@ function RegisterForm() {
           </div>
         )}
 
-        <datalist id="college-options">
-          {colleges.map((c: any) => (
-            <option key={c.id} value={c.name} />
-          ))}
-        </datalist>
+
       </div>
     </div>
   );
