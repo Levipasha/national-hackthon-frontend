@@ -37,7 +37,10 @@ export default function ParticipantsPage() {
         const res = await fetch(`${apiUrl}/api/public/colleges`);
         if (res.ok) {
           const list = await res.json();
-          setColleges(list);
+          const cleanList = (list as string[]).filter(
+            (c) => c && c.trim() !== '' && c.toLowerCase() !== 'codesprint core' && c.toLowerCase() !== 'n/a'
+          );
+          setColleges(cleanList);
         }
       } catch (err) {
         console.error('Failed to fetch colleges:', err);
@@ -45,6 +48,22 @@ export default function ParticipantsPage() {
     };
     fetchColleges();
   }, []);
+
+  // Filter out admin placeholder entries (e.g. CODESPRINT Core) from colleges list
+  const participatingColleges = React.useMemo(() => {
+    const set = new Set<string>();
+    colleges.forEach((c) => {
+      if (c && c.toLowerCase() !== 'codesprint core' && c.toLowerCase() !== 'n/a') {
+        set.add(c.trim());
+      }
+    });
+    participants.forEach((p) => {
+      if (p.college && p.college.toLowerCase() !== 'codesprint core' && p.college !== 'N/A') {
+        set.add(p.college.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [colleges, participants]);
 
   // Fetch initial total participants count on mount
   useEffect(() => {
@@ -182,7 +201,7 @@ export default function ParticipantsPage() {
               <p className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Colleges</p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-2xl sm:text-3xl font-black text-slate-900">
-                  {colleges.length}
+                  {participatingColleges.length}
                 </span>
                 <span className="text-xs text-slate-500 font-medium">institutions</span>
               </div>
@@ -216,7 +235,7 @@ export default function ParticipantsPage() {
                 className="w-full sm:w-56 py-2 px-3 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-purple-500/50 text-xs appearance-none cursor-pointer"
               >
                 <option value="">All Colleges</option>
-                {colleges.map((c) => (
+                {participatingColleges.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
