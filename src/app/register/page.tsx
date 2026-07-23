@@ -639,16 +639,19 @@ function RegisterForm() {
         branch: leaderDetails.branch === 'Other' ? customLeaderBranch.trim() : leaderDetails.branch
       };
 
+      const finalPayablePrice = getFinalPrice();
+      const payingQuantity = Math.max(0, Math.round(finalPayablePrice / 399));
+
       // Generate Razorpay order on the backend publicly
       const orderRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/payments/create-order-public', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           registrationType: 'TEAM',
-          quantity: totalMembers,
+          quantity: payingQuantity,
           email: leaderPayload.email,
           emails: [leaderPayload.email, ...addedMembers.map(m => m.email)],
-          amount: getFinalPrice()
+          amount: finalPayablePrice
         })
       });
 
@@ -720,6 +723,9 @@ function RegisterForm() {
         return;
       }
 
+      const finalPayablePrice = getFinalPrice();
+      const payingQuantity = Math.max(0, Math.round(finalPayablePrice / 399));
+
       // Generate payment order publicly
       const orderRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/payments/create-order-public', {
         method: 'POST',
@@ -728,10 +734,10 @@ function RegisterForm() {
         },
         body: JSON.stringify({
           registrationType: 'INDIVIDUAL',
-          quantity: 1,
+          quantity: payingQuantity,
           email: individualPayload.email,
           emails: [individualPayload.email],
-          amount: getFinalPrice()
+          amount: finalPayablePrice
         })
       });
 
