@@ -181,19 +181,21 @@ function RegisterForm() {
       .then(data => setColleges(data))
       .catch(console.error);
 
-    // Prefill unique incremental team code from backend
+    // Prefill unique random team code from backend
     fetch(process.env.NEXT_PUBLIC_API_URL + '/api/public/generate-team-code')
       .then(res => res.json())
       .then(data => {
         if (data && data.success && data.code) {
           setTeamCode(data.code);
         } else {
-          setTeamCode('CS2026-001');
+          const randomCode = `CS2026-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+          setTeamCode(randomCode);
         }
       })
       .catch(err => {
         console.error(err);
-        setTeamCode('CS2026-001');
+        const randomCode = `CS2026-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+        setTeamCode(randomCode);
       });
   }, []);
 
@@ -594,6 +596,9 @@ function RegisterForm() {
   // Submit team registration and proceed to payment (Step 4 CREATE)
   const handleTeamRegistrationSubmit = async () => {
     setErrorMsg('');
+    if (!leaderDetails.name.trim() || !leaderDetails.email.trim() || !leaderDetails.phone.trim() || !leaderDetails.college.trim() || !leaderDetails.branch) {
+      return setErrorMsg('Team Leader details are incomplete. Please complete Step 2.');
+    }
     if (totalMembers < 3) {
       return setErrorMsg('Minimum 3 members are required (including leader) to register a team.');
     }

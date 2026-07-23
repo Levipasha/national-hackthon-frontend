@@ -6,7 +6,6 @@ import { SocketProvider } from "../context/SocketContext";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import VisitorTracker from "../components/VisitorTracker";
-import MaintenanceOverlay from "../components/MaintenanceOverlay";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -29,7 +28,6 @@ export default function RootLayout({
       className={`${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-purple-100 selection:text-purple-900">
-        <MaintenanceOverlay />
         <AuthProvider>
           <SocketProvider>
             <VisitorTracker />

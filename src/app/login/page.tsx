@@ -11,7 +11,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error'; registerUrl?: string } | null>(null);
 
   useEffect(() => {
     // Check query params for impersonation token
@@ -84,11 +84,15 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.status === 202) {
-        setMessage({ text: 'Google account verified! Redirecting to complete registration…', type: 'success' });
-        setTimeout(() => {
-          router.push(`/register?email=${encodeURIComponent(data.email)}&name=${encodeURIComponent(data.name)}`);
-        }, 1200);
+      if (res.status === 404 || data.notRegistered || res.status === 202) {
+        const userEmail = data.email || '';
+        const userName = data.name || '';
+        const regUrl = `/register${userEmail ? `?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}` : ''}`;
+        setMessage({
+          text: `Account not found for ${userEmail || 'this email'}. You are not registered yet. Please register first to participate!`,
+          type: 'error',
+          registerUrl: regUrl
+        });
       } else if (res.ok && data.token && data.user) {
         login(data.token, data.user);
         setMessage({ text: 'Welcome back! Redirecting…', type: 'success' });
@@ -140,15 +144,25 @@ export default function LoginPage() {
 
           {/* Alert */}
           {message && (
-            <div className={`p-3 rounded-xl border text-xs leading-relaxed mb-5 flex gap-2.5 items-start ${
+            <div className={`p-3.5 rounded-xl border text-xs leading-relaxed mb-5 flex flex-col gap-2 ${
               message.type === 'success'
-                ? 'bg-slate-50 border-slate-200 text-slate-700'
-                : 'bg-rose-50 border-rose-250/50 text-rose-800'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}>
-              {message.type === 'success'
-                ? <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-slate-555 mt-0.5" />
-                : <ShieldAlert className="h-4 w-4 flex-shrink-0 text-rose-500 mt-0.5" />}
-              <span>{message.text}</span>
+              <div className="flex gap-2.5 items-start">
+                {message.type === 'success'
+                  ? <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600 mt-0.5" />
+                  : <ShieldAlert className="h-4 w-4 flex-shrink-0 text-rose-500 mt-0.5" />}
+                <span className="font-medium">{message.text}</span>
+              </div>
+              {message.registerUrl && (
+                <a
+                  href={message.registerUrl}
+                  className="mt-1 inline-flex items-center justify-center py-2 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-colors self-start shadow-sm"
+                >
+                  Register for CodeSprint 2026 →
+                </a>
+              )}
             </div>
           )}
 
