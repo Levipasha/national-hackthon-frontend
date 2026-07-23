@@ -581,13 +581,22 @@ function RegisterForm() {
     ? totalMembers * 399
     : (user && user.role === 'team-leader' && teamMemberCount ? teamMemberCount * 399 : 399);
   
+  const ONE_TIME_FREE_EMAILS = ['athoshith1@gmail.com'];
   const VIP_FREE_EMAILS = ['vamshi.c2002@gmail.com', 'vamshi.vam2002@gmail.com', 'abbupsha61@gmail.com', 'abbupasha61@gmail.com'];
 
   const getFinalPrice = () => {
-    const emailToTest = (regMode === 'CREATE' ? leaderDetails.email : individualDetails.email) || '';
-    if (VIP_FREE_EMAILS.includes(emailToTest.trim().toLowerCase())) {
-      return 0;
+    const emailsInTeam: string[] = regMode === 'CREATE'
+      ? [leaderDetails.email, ...addedMembers.map(m => m.email)].filter(Boolean)
+      : [individualDetails.email].filter(Boolean);
+
+    const hasVipFree = emailsInTeam.some(e => VIP_FREE_EMAILS.includes(e.trim().toLowerCase()));
+    if (hasVipFree) return 0;
+
+    const hasOneTimeFree = emailsInTeam.some(e => ONE_TIME_FREE_EMAILS.includes(e.trim().toLowerCase()));
+    if (hasOneTimeFree) {
+      return Math.max(0, basePrice - 399); // Deduct 1 member share (₹399)
     }
+
     return basePrice;
   };
 
@@ -637,7 +646,8 @@ function RegisterForm() {
         body: JSON.stringify({
           registrationType: 'TEAM',
           quantity: totalMembers,
-          email: leaderPayload.email
+          email: leaderPayload.email,
+          emails: [leaderPayload.email, ...addedMembers.map(m => m.email)]
         })
       });
 
@@ -718,7 +728,8 @@ function RegisterForm() {
         body: JSON.stringify({
           registrationType: 'INDIVIDUAL',
           quantity: 1,
-          email: individualPayload.email
+          email: individualPayload.email,
+          emails: [individualPayload.email]
         })
       });
 
