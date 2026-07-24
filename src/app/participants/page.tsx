@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, User, Users, School, GraduationCap, Crown, Shield, UserCheck, X, Sparkles } from 'lucide-react';
+import { Search, Filter, User, Users, School, GraduationCap, Crown, Shield, UserCheck, X, Sparkles, Calendar } from 'lucide-react';
 
 interface Participant {
   id: string;
@@ -14,56 +14,21 @@ interface Participant {
   teamId: string;
   teamRole: 'leader' | 'member';
   teamName: string;
+  createdAt?: string;
 }
 
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [colleges, setColleges] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalParticipants, setTotalParticipants] = useState<number | null>(null);
 
   // Filters state
   const [search, setSearch] = useState('');
-  const [selectedCollege, setSelectedCollege] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [joinedFilter, setJoinedFilter] = useState('');
 
-  const isFiltered = Boolean(search.trim() || selectedCollege);
+  const isFiltered = Boolean(search.trim() || selectedYear || joinedFilter);
   const displayTotal = totalParticipants !== null ? totalParticipants : (loading ? 0 : participants.length);
-
-  // Fetch distinct colleges
-  useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiUrl}/api/public/colleges`);
-        if (res.ok) {
-          const list = await res.json();
-          const cleanList = (list as string[]).filter(
-            (c) => c && c.trim() !== '' && c.toLowerCase() !== 'codesprint core' && c.toLowerCase() !== 'n/a'
-          );
-          setColleges(cleanList);
-        }
-      } catch (err) {
-        console.error('Failed to fetch colleges:', err);
-      }
-    };
-    fetchColleges();
-  }, []);
-
-  // Filter out admin placeholder entries (e.g. CODESPRINT Core) from colleges list
-  const participatingColleges = React.useMemo(() => {
-    const set = new Set<string>();
-    colleges.forEach((c) => {
-      if (c && c.toLowerCase() !== 'codesprint core' && c.toLowerCase() !== 'n/a') {
-        set.add(c.trim());
-      }
-    });
-    participants.forEach((p) => {
-      if (p.college && p.college.toLowerCase() !== 'codesprint core' && p.college !== 'N/A') {
-        set.add(p.college.trim());
-      }
-    });
-    return Array.from(set).sort();
-  }, [colleges, participants]);
 
   // Fetch initial total participants count on mount
   useEffect(() => {
@@ -88,14 +53,13 @@ export default function ParticipantsPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
-      if (selectedCollege) params.append('college', selectedCollege);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${apiUrl}/api/public/participants?${params.toString()}`);
       if (res.ok) {
         const list = await res.json();
         setParticipants(list);
-        if (!search && !selectedCollege) {
+        if (!search) {
           setTotalParticipants(list.length);
         }
       }
@@ -108,18 +72,63 @@ export default function ParticipantsPage() {
 
   useEffect(() => {
     fetchParticipants();
-  }, [search, selectedCollege]);
+  }, [search]);
+
+  // Frontend filter for Year and Date Joined
+  const filteredParticipants = React.useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOf7DaysAgo = new Date(startOfToday.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    return participants.filter((p) => {
+      // Year Filter
+      if (selectedYear) {
+        const y = selectedYear.toLowerCase();
+        const pYear = (p.year || '').toLowerCase();
+        const ordinal = y.replace(' year', '');
+        const digit = y.replace(/[^0-9]/g, '');
+        const matchesYear =
+          pYear === y ||
+          pYear.includes(ordinal) ||
+          pYear === digit ||
+          (pYear.includes('1st') && ordinal === '1st') ||
+          (pYear.includes('2nd') && ordinal === '2nd') ||
+          (pYear.includes('3rd') && ordinal === '3rd') ||
+          (pYear.includes('4th') && ordinal === '4th');
+
+        if (!matchesYear) return false;
+      }
+
+      // Joined Filter
+      if (joinedFilter) {
+        if (!p.createdAt) return false;
+        const joinDate = new Date(p.createdAt);
+        const time = joinDate.getTime();
+
+        if (joinedFilter === 'today') {
+          if (time < startOfToday.getTime()) return false;
+        } else if (joinedFilter === 'past7') {
+          if (time < startOf7DaysAgo.getTime() || time >= startOfToday.getTime()) return false;
+        } else if (joinedFilter === 'older') {
+          if (time >= startOf7DaysAgo.getTime()) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [participants, selectedYear, joinedFilter]);
 
   // Clear filters
   const clearFilters = () => {
     setSearch('');
-    setSelectedCollege('');
+    setSelectedYear('');
+    setJoinedFilter('');
   };
 
   // Group participants by teamName
   const groupedTeams = React.useMemo(() => {
     const groups: { [teamName: string]: Participant[] } = {};
-    participants.forEach((p) => {
+    filteredParticipants.forEach((p) => {
       const groupKey = p.teamName || 'Individual Participants';
       if (!groups[groupKey]) {
         groups[groupKey] = [];
@@ -137,7 +146,7 @@ export default function ParticipantsPage() {
     });
 
     return groups;
-  }, [participants]);
+  }, [filteredParticipants]);
 
   return (
     <div className="flex-1 w-full bg-slate-50 text-slate-800 relative overflow-hidden bg-grid pt-8 pb-20 px-4 sm:px-6 lg:px-8 animate-[fadeIn_0.3s_ease-out]">
@@ -155,7 +164,7 @@ export default function ParticipantsPage() {
         </div>
 
         {/* Counts Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
           {/* Total Students Card */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-3.5">
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0">
@@ -183,27 +192,11 @@ export default function ParticipantsPage() {
               </p>
               <div className="flex items-baseline gap-1.5 mt-0.5">
                 <span className="text-2xl sm:text-3xl font-black text-purple-700">
-                  {loading ? '...' : participants.length}
+                  {loading ? '...' : filteredParticipants.length}
                 </span>
                 {isFiltered && (
                   <span className="text-xs text-slate-500 font-medium">of {displayTotal}</span>
                 )}
-              </div>
-            </div>
-          </div>
-
-          {/* Colleges Card */}
-          <div className="col-span-2 sm:col-span-1 bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-3.5">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-              <School className="h-5 w-5 sm:h-6 sm:w-6" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Colleges</p>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900">
-                  {participatingColleges.length}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">institutions</span>
               </div>
             </div>
           </div>
@@ -227,20 +220,38 @@ export default function ParticipantsPage() {
 
           {/* Filters Group */}
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            {/* College Filter */}
+            {/* Year Filter */}
             <div className="relative flex-1 sm:flex-none">
               <select
-                value={selectedCollege}
-                onChange={(e) => setSelectedCollege(e.target.value)}
-                className="w-full sm:w-56 py-2 px-3 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-purple-500/50 text-xs appearance-none cursor-pointer"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-full sm:w-40 py-2 pl-3 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-purple-500/50 text-xs appearance-none cursor-pointer"
               >
-                <option value="">All Colleges</option>
-                {participatingColleges.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                <option value="">All Years</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
               </select>
               <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400">
-                <Filter className="h-3 w-3" />
+                <GraduationCap className="h-3.5 w-3.5 text-slate-400" />
+              </span>
+            </div>
+
+            {/* Joined Filter */}
+            <div className="relative flex-1 sm:flex-none">
+              <select
+                value={joinedFilter}
+                onChange={(e) => setJoinedFilter(e.target.value)}
+                className="w-full sm:w-40 py-2 pl-3 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-purple-500/50 text-xs appearance-none cursor-pointer"
+              >
+                <option value="">When Joined</option>
+                <option value="today">Today</option>
+                <option value="past7">Past 7 Days</option>
+                <option value="older">Older</option>
+              </select>
+              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400">
+                <Calendar className="h-3.5 w-3.5 text-slate-400" />
               </span>
             </div>
 
@@ -263,7 +274,7 @@ export default function ParticipantsPage() {
                 {loading
                   ? 'Loading...'
                   : isFiltered
-                  ? `${participants.length} / ${displayTotal} Students`
+                  ? `${filteredParticipants.length} / ${displayTotal} Students`
                   : `${displayTotal} Total Students`}
               </span>
             </div>
@@ -290,7 +301,7 @@ export default function ParticipantsPage() {
             <Users className="h-12 w-12 text-slate-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-slate-800">No Participants Found</h3>
             <p className="text-xs text-slate-500 mt-1">
-              Try modifying your search query or college filter.
+              Try modifying your search query or filters.
             </p>
             {isFiltered && (
               <button
@@ -304,7 +315,7 @@ export default function ParticipantsPage() {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {participants.map((member) => {
+            {filteredParticipants.map((member) => {
               const isLeader = member.teamRole === 'leader' || member.role === 'team-leader';
 
               return (
