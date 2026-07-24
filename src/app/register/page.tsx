@@ -503,6 +503,12 @@ function RegisterForm() {
       return setErrorMsg('Please enter your custom Branch/Dept name.');
     }
 
+    const leaderCollege = leaderDetails.college.trim();
+    const isLeaderCollegeInDb = colleges.some((c: any) => c.name.toLowerCase().trim() === leaderCollege.toLowerCase());
+    if (!isLeaderCollegeInDb) {
+      setLeaderDetails(prev => ({ ...prev, college: 'Other' }));
+    }
+
     setCreateStep(3);
   };
 
@@ -536,7 +542,9 @@ function RegisterForm() {
       return setErrorMsg('A member with this email is already added.');
     }
 
-    const finalCollege = memberForm.college.trim();
+    const memberCollege = memberForm.college.trim();
+    const isMemberCollegeInDb = colleges.some((c: any) => c.name.toLowerCase().trim() === memberCollege.toLowerCase());
+    const finalCollege = isMemberCollegeInDb ? memberCollege : 'Other';
     const finalBranch = memberForm.branch === 'Other' ? customMemberBranch.trim() : memberForm.branch;
     setAddedMembers([...addedMembers, { 
       ...memberForm, 
@@ -641,9 +649,12 @@ function RegisterForm() {
 
     setLoading(true);
     try {
+      const leaderCollegeName = leaderDetails.college.trim();
+      const isLeaderCollegeInDb = colleges.some((c: any) => c.name.toLowerCase().trim() === leaderCollegeName.toLowerCase());
+
       const leaderPayload = {
         ...leaderDetails,
-        college: leaderDetails.college.trim(),
+        college: isLeaderCollegeInDb ? leaderCollegeName : 'Other',
         branch: leaderDetails.branch === 'Other' ? customLeaderBranch.trim() : leaderDetails.branch
       };
 
@@ -707,11 +718,17 @@ function RegisterForm() {
       return setErrorMsg('Please enter your custom Branch/Specialization.');
     }
 
+    const individualCollegeName = individualDetails.college.trim();
+    const isIndividualCollegeInDb = colleges.some((c: any) => c.name.toLowerCase().trim() === individualCollegeName.toLowerCase());
+    if (!isIndividualCollegeInDb) {
+      setIndividualDetails(prev => ({ ...prev, college: 'Other' }));
+    }
+
     setLoading(true);
     try {
       const individualPayload = {
         ...individualDetails,
-        college: individualDetails.college.trim(),
+        college: isIndividualCollegeInDb ? individualCollegeName : 'Other',
         branch: individualDetails.branch === 'Other' ? customIndividualBranch.trim() : individualDetails.branch,
         registrationType: 'INDIVIDUAL'
       };
@@ -1220,6 +1237,17 @@ function RegisterForm() {
                       onChange={handleLeaderChange} 
                       onFocus={() => setShowLeaderColleges(true)}
                       onBlur={() => setTimeout(() => setShowLeaderColleges(false), 200)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const currentVal = leaderDetails.college.trim();
+                          const matches = colleges.some((c: any) => c.name.toLowerCase().trim() === currentVal.toLowerCase());
+                          if (currentVal && !matches) {
+                            e.preventDefault();
+                            setLeaderDetails(prev => ({ ...prev, college: 'Other' }));
+                            setShowLeaderColleges(false);
+                          }
+                        }
+                      }}
                       className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
                     />
                     {showLeaderColleges && getFilteredColleges(leaderDetails.college).length > 0 && (
@@ -1402,6 +1430,17 @@ function RegisterForm() {
                           onChange={handleMemberChange} 
                           onFocus={() => setShowMemberColleges(true)}
                           onBlur={() => setTimeout(() => setShowMemberColleges(false), 200)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const currentVal = memberForm.college.trim();
+                              const matches = colleges.some((c: any) => c.name.toLowerCase().trim() === currentVal.toLowerCase());
+                              if (currentVal && !matches) {
+                                e.preventDefault();
+                                setMemberForm(prev => ({ ...prev, college: 'Other' }));
+                                setShowMemberColleges(false);
+                              }
+                            }
+                          }}
                           className="block w-full px-3 py-2 rounded-xl border border-slate-200 text-xxs" 
                         />
                         {showMemberColleges && getFilteredColleges(memberForm.college).length > 0 && (
@@ -1886,6 +1925,17 @@ function RegisterForm() {
                     onChange={handleIndividualChange} 
                     onFocus={() => setShowIndividualColleges(true)}
                     onBlur={() => setTimeout(() => setShowIndividualColleges(false), 200)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const currentVal = individualDetails.college.trim();
+                        const matches = colleges.some((c: any) => c.name.toLowerCase().trim() === currentVal.toLowerCase());
+                        if (currentVal && !matches) {
+                          e.preventDefault();
+                          setIndividualDetails(prev => ({ ...prev, college: 'Other' }));
+                          setShowIndividualColleges(false);
+                        }
+                      }
+                    }}
                     className="block w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs" 
                   />
                   {showIndividualColleges && getFilteredColleges(individualDetails.college).length > 0 && (

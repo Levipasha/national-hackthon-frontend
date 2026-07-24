@@ -1677,6 +1677,16 @@ export default function UserDashboard() {
                           placeholder="Type to search college..."
                           value={addMemberForm.college}
                           onChange={(e) => setAddMemberForm(prev => ({ ...prev, college: e.target.value }))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const currentVal = addMemberForm.college.trim();
+                              const matches = colleges.some((c: any) => c.name.toLowerCase().trim() === currentVal.toLowerCase());
+                              if (currentVal && !matches) {
+                                e.preventDefault();
+                                setAddMemberForm(prev => ({ ...prev, college: 'Other' }));
+                              }
+                            }
+                          }}
                           className="block w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500/50 text-xs"
                         />
                         <datalist id="member-college-options">
@@ -1821,7 +1831,9 @@ export default function UserDashboard() {
 
                           setAddMemberError('');
                           const finalBranch = addMemberForm.branch === 'Other' ? customBranch.trim() : addMemberForm.branch;
-                          const finalCollege = addMemberForm.college.trim();
+                          const memberCollege = addMemberForm.college.trim();
+                          const isCollegeInDb = colleges.some((c: any) => c.name.toLowerCase().trim() === memberCollege.toLowerCase());
+                          const finalCollege = isCollegeInDb ? memberCollege : 'Other';
 
                           setSessionMembers(prev => [...prev, {
                             name: addMemberForm.name.trim(),
