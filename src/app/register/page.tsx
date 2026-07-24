@@ -115,9 +115,13 @@ function RegisterForm() {
   const [showIndividualColleges, setShowIndividualColleges] = useState(false);
 
   const getFilteredColleges = (query: string) => {
-    if (!query) return colleges.slice(0, 15);
-    const q = query.toLowerCase();
-    return colleges.filter((c: any) => c.name.toLowerCase().includes(q)).slice(0, 15);
+    const q = (query || '').toLowerCase().trim();
+    let filtered = colleges.filter((c: any) => c.name.toLowerCase().includes(q));
+    filtered = filtered.slice(0, 15);
+    if (!filtered.some((c: any) => c.name.toLowerCase().trim() === 'other')) {
+      filtered.push({ id: 'other_option', name: 'Other' });
+    }
+    return filtered;
   };
 
   const [customLeaderCollege, setCustomLeaderCollege] = useState('');

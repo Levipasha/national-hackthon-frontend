@@ -1683,6 +1683,7 @@ export default function UserDashboard() {
                           {colleges.map((c: any) => (
                             <option key={c.id} value={c.name} />
                           ))}
+                          <option value="Other" />
                         </datalist>
                       </div>
 
