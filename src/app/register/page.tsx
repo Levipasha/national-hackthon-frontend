@@ -46,7 +46,7 @@ function RegisterForm() {
   const { login, user, refreshUser, logout } = useAuth();
 
   // Mode Selection: 'selection' | 'CREATE' | 'JOIN'
-  const [regMode, setRegMode] = useState<'selection' | 'CREATE' | 'JOIN'>('selection');
+  const [regMode, setRegMode] = useState<'selection' | 'CREATE' | 'JOIN'>('JOIN');
 
   // Wizards steps
   // CREATE steps: 1: Team details, 2: Leader profile, 3: Add members, 4: Review & Payment, 5: Post-payment availability
@@ -149,6 +149,10 @@ function RegisterForm() {
       const params = new URLSearchParams(window.location.search);
       const emailParam = params.get('email');
       const nameParam = params.get('name');
+      const modeParam = params.get('mode') || params.get('type');
+      if (modeParam && (modeParam.toUpperCase() === 'JOIN' || modeParam.toLowerCase() === 'individual')) {
+        setRegMode('JOIN');
+      }
       if (emailParam) {
         const cleanEmail = emailParam.toLowerCase().trim();
         setLeaderDetails(prev => ({ ...prev, email: cleanEmail, name: nameParam || prev.name }));
@@ -1035,7 +1039,12 @@ function RegisterForm() {
 
         <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-2xl text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">CodeSprint 2026 Registration</h1>
-          <p className="text-sm text-slate-500 mb-10 max-w-lg mx-auto">Get ready for the ultimate 24-hour hackathon. Choose your path below to secure your spot at Audisankara University.</p>
+          <p className="text-sm text-slate-500 mb-6 max-w-lg mx-auto">Get ready for the ultimate 24-hour hackathon. Choose your path below to secure your spot at Audisankara University.</p>
+
+          <div className="mb-8 p-3.5 bg-purple-50/80 border border-purple-200/80 rounded-2xl text-purple-900 text-xs leading-relaxed flex items-center justify-center gap-2.5 max-w-xl mx-auto shadow-xs">
+            <Info className="h-4.5 w-4.5 text-purple-600 flex-shrink-0" />
+            <span className="font-medium">Register as an individual attendee, pay your registration, and send join requests to open teams seeking members.</span>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
             {/* Create Team Card */}
@@ -1070,7 +1079,7 @@ function RegisterForm() {
               </div>
               <div className="pt-4 border-t border-slate-200/50 flex justify-between items-center mt-4">
                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Individual Entry</span>
-                <span className="text-xs font-semibold text-slate-800">₹399 Entry Fee</span>
+                <span className="text-xs font-semibold text-slate-800">₹399 Entry</span>
               </div>
             </div>
           </div>
@@ -1810,10 +1819,17 @@ function RegisterForm() {
 
       <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl relative">
         
-        {/* Back button — inline at top so it doesn't overlap form */}
+        {/* Red Note Box placed above Back button at the very top of the card */}
+        <div className="mb-5 p-4 rounded-2xl border border-rose-250 bg-rose-50 text-rose-800 text-xs font-semibold leading-relaxed flex items-start gap-2.5 shadow-sm animate-[fadeIn_0.2s_ease-out]">
+          <ShieldAlert className="h-4.5 w-4.5 text-rose-600 flex-shrink-0 mt-0.5" />
+          <span><strong className="text-rose-900 font-extrabold uppercase tracking-wide mr-1">Note:</strong> Register as an individual attendee, pay your registration, and send join requests to open teams seeking members.</span>
+        </div>
+
+        {/* Back button */}
         {joinStep === 1 && (
           <div className="mb-5">
             <button
+              type="button"
               onClick={() => setRegMode('selection')}
               className="text-slate-500 hover:text-slate-900 transition-all flex items-center gap-1 text-xs font-bold"
             >
