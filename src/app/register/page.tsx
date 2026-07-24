@@ -46,7 +46,7 @@ function RegisterForm() {
   const { login, user, refreshUser, logout } = useAuth();
 
   // Mode Selection: 'selection' | 'CREATE' | 'JOIN'
-  const [regMode, setRegMode] = useState<'selection' | 'CREATE' | 'JOIN'>('JOIN');
+  const [regMode, setRegMode] = useState<'selection' | 'CREATE' | 'JOIN'>('selection');
 
   // Wizards steps
   // CREATE steps: 1: Team details, 2: Leader profile, 3: Add members, 4: Review & Payment, 5: Post-payment availability
